@@ -34,8 +34,6 @@ docReady(function () {
 
 		let galleries = {}
 
-		console.log(gallery_ids)
-
 		for (let i in gallery_ids) {
 			let id = gallery_ids[i]
 			let url = findGalleryUrl(id)
@@ -44,6 +42,8 @@ docReady(function () {
 
 			galleries[id] = url
 		}
+
+		console.log(galleries)
 	})
 
 	const action_selector = document.querySelector('[name="ddact"]')
@@ -101,7 +101,38 @@ function findGalleryUrl(value) {
 		return 
 	}
 
-	let url = input.closest('.glname').firstElementChild.firstElementChild.getAttribute('href')
+	let mode = document.querySelector('#dms select').value
 
-	return url || ''
+	if (!mode) {
+		throw 'Cant find gallery mode selector'
+	}
+
+	switch (mode) {
+		case 't' : {
+			let wrapper =  input.closest('.glname')
+
+			if (!wrapper) {
+				console.error('Not found wrapper for field: ' + value)
+				return ''
+			}
+
+			return url = wrapper.firstElementChild.firstElementChild.getAttribute('href')
+		}
+
+		case 'm' : {
+			let wrapper =  input.closest('tr').querySelector('.glname')
+
+			if (!wrapper) {
+				console.error('Not found wrapper for field: ' + value)
+				return ''
+			}
+
+			return url = wrapper.firstElementChild.getAttribute('href')
+		}
+
+		default: {
+			console.error('invalid or not supported mode')
+			return ''
+		}
+	}
 }
