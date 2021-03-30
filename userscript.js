@@ -6,7 +6,7 @@
 // @match      *://exhentai.org/*
 // @match      *://e-hentai.org/*
 // ==/UserScript==
-var api_url = ''
+var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'
 
 docReady(function () {
 	const form = document.querySelector('form[name="favform"]')
@@ -50,7 +50,7 @@ docReady(function () {
 		const body = JSON.stringify({ galleries })
 
 		try {
-			let response = apiRequest(api_url + 'archives', {
+			let response = apiRequest(api_url + 'galleries', {
 				body, method : 'post'
 			})
 
