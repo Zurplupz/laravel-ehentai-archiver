@@ -15,10 +15,10 @@ docReady(function () {
 	form.addEventListener('submit', async function (e) {
 		e.preventDefault();
 
-		const body = new FormData(this);
+		const form = new FormData(this);
 
-		let action = body.get('ddact')
-		let gallery_ids = body.getAll('modifygids[]')
+		let action = form.get('ddact')
+		let gallery_ids = form.getAll('modifygids[]')
 
 		if (action !== 'archive' && !gallery_ids) {
 			console.log('not archiving')
@@ -44,6 +44,23 @@ docReady(function () {
 		}
 
 		console.log(galleries)
+
+		if (!galleries) return
+
+		const body = JSON.stringify({ galleries })
+
+		try {
+			let response = apiRequest(api_url + 'archives', {
+				body, method : 'post'
+			})
+
+			console.log(response)
+		}
+
+		catch (e) {
+			alert(e)
+			console.error(e)
+		}
 	})
 
 	const action_selector = document.querySelector('[name="ddact"]')
@@ -52,6 +69,8 @@ docReady(function () {
 	opt.value = 'archive'
 	opt.innerHTML = 'Archive'
 	action_selector.appendChild(opt)
+
+	console.log('done')
 })
 
 function docReady(fn) {
