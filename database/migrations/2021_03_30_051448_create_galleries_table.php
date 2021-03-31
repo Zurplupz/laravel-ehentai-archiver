@@ -18,6 +18,7 @@ class CreateGalleriesTable extends Migration
             $table->string('title');
             $table->integer('gid');
             $table->string('token', 50);
+            $table->timestamp('favorited')->nullable(true);
             $table->tinyInteger('archived')->default('0');
             $table->string('archiver_key', 100)->nullable(true);
             $table->string('category', 50)->nullable(true);
