@@ -17,7 +17,6 @@ class CreateGalleryTaggingsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tag_id');
             $table->unsignedBigInteger('gallery_id');
-            $table->timestamps();
 
             $table->foreign('gallery_id')
                 ->references('id')

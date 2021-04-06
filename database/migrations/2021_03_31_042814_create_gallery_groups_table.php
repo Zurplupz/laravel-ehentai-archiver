@@ -15,8 +15,9 @@ class CreateGalleryGroupsTable extends Migration
     {
         Schema::create('gallery_groups', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->timestamps();
-
+            $table->unsignedBigInteger('group_id');
+            $table->unsignedBigInteger('gallery_id');
+            
             $table->foreign('gallery_id')
                 ->references('id')
                 ->on('galleries')
