@@ -6,6 +6,7 @@ use App\Repositories\BaseRepo;
 use App\gallery;
 use App\tag;
 use App\gallery_tagging;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * 
@@ -30,6 +31,18 @@ class GalleryRepo extends BaseRepo
 	public function archived() :self
 	{
 		$this->model->where('archived', 1);
+
+		return $this;
+	}
+
+	public function inGroup(string $name) :self
+	{
+		$this->model->with([
+			'gallery_group.group' => function ($query) 
+			{
+				$query->where('name', 'like', "{$name}");
+			}
+		]);
 
 		return $this;
 	}
@@ -126,9 +139,32 @@ class GalleryRepo extends BaseRepo
 		}
 	}
 
+	protected function flattenRelationships($data)
+	{
+		if (!$data instanceof Collection) {
+			return $data;
+		}
+
+		$data->each(function ($model) {
+			$group_list = [];
+
+			$model->gallery_group->each(
+				function ($gal_group) use (&$group_list) {
+					$group_list[] = $gal_group->group->name;
+				}
+			);
+
+			$model->group_list = $group_list;
+		});
+
+		return $data;
+	}
+
 	public function get()
 	{
 		$result = $this->model->get();
+
+		$result = $this->flattenRelationships($result);
 		
 		$q = new gallery;
 
@@ -140,6 +176,8 @@ class GalleryRepo extends BaseRepo
 	public function first()
 	{
 		$result = $this->model->first();
+
+		$result = $this->flattenRelationships($result);
 		
 		$q = new gallery;
 
