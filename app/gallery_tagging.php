@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class gallery_tagging extends Model
 {
-    protected $timestamps = false;
+    public $timestamps = false;
 }
