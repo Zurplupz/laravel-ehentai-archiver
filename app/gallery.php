@@ -10,4 +10,9 @@ class gallery extends Model
 	{
 		return $this->hasMany('App\gallery_group');
 	}
+
+	public function gallery_tagging()
+	{
+		return $this->hasMany('App\gallery_tagging');
+	}
 }
