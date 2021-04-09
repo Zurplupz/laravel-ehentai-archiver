@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name     E-hentai favorite pages archiver
+// @name     E-hentai favorite galleries archiver
 // @author	 Zurplupz - https://github.com/Zurplupz
 // @version  0.0.1
 // @grant    none
@@ -36,22 +36,21 @@ docReady(function () {
 
 		for (let i in gallery_ids) {
 			let id = gallery_ids[i]
-			let url = findGalleryUrl(id)
+			let gdata = findGalleryData(id)
 
-			if (!url) continue
+			if (!gdata) continue
 
-			galleries[id] = url
+			galleries[id] = gdata
 		}
-
-		console.log(galleries)
 
 		if (!galleries) return
 
 		const body = JSON.stringify({ galleries })
 
 		try {
-			let response = apiRequest(api_url + 'galleries', {
-				body, method : 'post'
+			let response = await apiRequest(api_url + 'galleries', {
+				body, method : 'post', 
+				headers : { 'Content-Type': 'application/json' }
 			})
 
 			console.log(response)
@@ -87,15 +86,15 @@ async function apiRequest(url, params={}, expect='json') {
 	let response = await fetch(url, params)
 
 	if (!response.ok) {
-		let body = response.body
+		let json;
 
 		try {
-			let data = await response.json()
+			json = await response.json()
 		} catch (e) {
-			throw body
+			throw new Error(e)
 		}
 
-		throw data.error
+		throw new Error(json.errors)
 	}
 
 	switch (expect) {
@@ -110,7 +109,7 @@ async function apiRequest(url, params={}, expect='json') {
 	return data
 }
 
-function findGalleryUrl(value) {
+function findGalleryData(value) {
 	let selector = 'input[value="' + value + '"]'
 
 	const input = document.querySelector(selector)
@@ -135,18 +134,28 @@ function findGalleryUrl(value) {
 				return ''
 			}
 
-			return url = wrapper.firstElementChild.firstElementChild.getAttribute('href')
+			return {
+				url : wrapper.firstElementChild.firstElementChild.getAttribute('href'),
+				name : wrapper.querySelector('.glink').innerText
+			}
 		}
 
 		case 'm' : {
-			let wrapper =  input.closest('tr').querySelector('.glname')
+			let row =  input.closest('tr')
 
-			if (!wrapper) {
+			if (!row) {
 				console.error('Not found wrapper for field: ' + value)
 				return ''
 			}
 
-			return url = wrapper.firstElementChild.getAttribute('href')
+			return { 
+				url : row.querySelector('.glname a').getAttribute('href'),
+				name : row.querySelector('.glink').innerText,
+				category : row.querySelector('.glcat .cs').innerText,
+				favorited : row.querySelector('.glfav').innerText,
+				posted : row.querySelector('.gl2m').lastElementChild.innerText,
+				group : row.querySelector('.gl2m').lastElementChild.getAttribute('title')
+			}
 		}
 
 		default: {
