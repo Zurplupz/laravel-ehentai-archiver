@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\ApiClients\ExhentaiClient;
 use App\Repositories\GalleryRepo;
+use App\Http\Requests\ArchiveRequest;
 
 class GalleryController extends Controller
 {
@@ -42,41 +43,63 @@ class GalleryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ArchiveRequest $request)
     {
         $data = $request->json()->all();
-    
-        if (empty($data['galleries'])) {
-            abort(400, 'no galleries given');
-        }
 
         $gid_token_pairs = [];
+        $response = [];
 
-        foreach ($data['galleries'] as $id => $url) {
+        foreach ($data['galleries'] as $id => $data) {
             // lookup metadata
-            $pair = gidTokenFromUrl($url);
+            $pair = gidTokenFromUrl($data['url']);
 
             if (!$pair) {
+                $response[$id] = [
+                    'status' => 'error'
+                ];
                 continue;
             }
 
-            $g = $this->galleries->gid($pair[0])->archived()->first();
+            $g = $this->galleries->gid($pair[0])->first();
 
             if ($g) {
+                $response[$id] = [
+                    'status' => $g->archived ? 'archived' : 'pending'
+                ];
                 continue;
             }
 
             $gid_token_pairs[] = $pair;
 
         }
+
+        if (empty($gid_token_pairs)) {
+            return response()->json($response);
+        }
             
         $r = $this->exhentai->getGalleriesMetadata($gid_token_pairs);
 
         foreach ($r['gmetadata'] as $metadata) {
+            $gid = $metadata['gid'];
+
+            if (!empty($metadata['error'])) {
+
+                $response[$gid] = [
+                    'status' => 'not_found'
+                ];
+
+                $this->galleries->add($data['galleries'][$gid]);
+            }
+
             $this->galleries->add($metadata);
+
+            $response[$gid] = [
+                'status' => 'pending'
+            ];
         }
 
-        return response()->json($r);
+        return response()->json($response);
     }
 
     /**
