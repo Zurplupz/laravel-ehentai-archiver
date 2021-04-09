@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\ApiClients\ExhentaiClient;
 use App\Repositories\GalleryRepo;
 use App\Http\Requests\ArchiveRequest;
+use App\Http\Requests\GalleryRequest;
 
 class GalleryController extends Controller
 {
@@ -23,8 +24,11 @@ class GalleryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(GalleryRequest $request)
     {
+        $response = $this->galleries->handleRequest($request)->get();
+    
+        return $response->toJson();
     }
 
     /**

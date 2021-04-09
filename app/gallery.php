@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class gallery extends Model
 {
+	protected $hidden = ['gallery_group','gallery_tagging'];
+
 	public function gallery_group()
 	{
 		return $this->hasMany('App\gallery_group');
