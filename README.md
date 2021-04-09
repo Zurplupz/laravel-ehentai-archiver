@@ -31,10 +31,11 @@ Top ones are most likely to come sooner.
 ## Setup
 1. `git clone repo@ssh exhentai-archiver && cd exhentai-archiver`
 2. `composer install`
-3. `php artisan migrate`
-3. Install an userscript extension on your browser (I recommend ViolentMonkey)
-4. Edit `var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'`, replace `lr/ehentai-archiver/` with the directory where you installed the project
-5. Add the userscript.js to the extension
+3. Edit .env file with database login and name of database to use, defaults: root, no pass, exhentai
+4. `php artisan migrate`
+5. Install an userscript extension on your browser (I recommend ViolentMonkey)
+6. Edit `var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'`, replace `lr/ehentai-archiver/` with the directory where you installed the project
+7. Add the userscript.js to the extension
 
 ## Usage
 1. Go to exhentai favorites page
