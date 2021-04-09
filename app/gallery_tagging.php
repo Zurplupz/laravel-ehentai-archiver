@@ -15,6 +15,6 @@ class gallery_tagging extends Model
 
     public function tag()
     {
-    	return $this->belongsTo('App\gallery');
+    	return $this->belongsTo('App\tag');
     }
 }
