@@ -7,6 +7,7 @@ use App\gallery;
 use App\tag;
 use App\gallery_tagging;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * 
@@ -39,6 +40,18 @@ class GalleryRepo extends BaseRepo
 	{
 		$this->model->with([
 			'gallery_group.group' => function ($query) 
+			{
+				$query->where('name', 'like', "{$name}");
+			}
+		]);
+
+		return $this;
+	}
+
+	public function tagged(string $name) :self
+	{
+		$this->model->with([
+			'gallery_tagging.tag' => function ($query) 
 			{
 				$query->where('name', 'like', "{$name}");
 			}
@@ -87,7 +100,7 @@ class GalleryRepo extends BaseRepo
 			}
 
 			if (empty($gallery)) {
-				$gallery = $this->gid($data['gid'])->first();
+				$gallery = $this->gid($data['gid'])->first(false);
 
 				if (empty($gallery)) {
 					$gallery = new gallery;
@@ -141,48 +154,83 @@ class GalleryRepo extends BaseRepo
 
 	protected function flattenRelationships($data)
 	{
-		if (!$data instanceof Collection) {
+		if (!$data instanceof Model) 
+		{
+			if (!$data instanceof Collection) {
+				return $data;
+			}
+
+			$data->each(function ($model) {
+				$this->flattenRelationships($model);
+			});
+
 			return $data;
 		}
 
-		$data->each(function ($model) {
-			$group_list = [];
+		$tag_list = [];
 
-			$model->gallery_group->each(
-				function ($gal_group) use (&$group_list) {
-					$group_list[] = $gal_group->group->name;
-				}
-			);
+		$data->gallery_tagging->each(
+			function ($relationship) use (&$tag_list) {
+				$id = $relationship->tag->id;
 
-			$model->group_list = $group_list;
-		});
+				$tag_list[$id] = $relationship->tag->name;
+			}
+		);
+
+		$data->tag_list = $tag_list;
+
+		$group_list = [];
+
+		$data->gallery_group->each(
+			function ($relationship) use (&$group_list) {
+				$id = $relationship->group->id;
+
+				$group_list[$id] = $relationship->group->name;
+			}
+		);
+
+		$data->group_list = $group_list;
 
 		return $data;
 	}
 
-	public function get()
+	protected function reset()
+	{		
+		$q = new gallery;
+
+		$this->defineModel($q->query());
+	}
+
+	public function get(bool $flatten=true)
 	{
 		$result = $this->model->get();
 
-		$result = $this->flattenRelationships($result);
-		
-		$q = new gallery;
+		$this->reset();
 
-		$this->defineModel($q->query());
-
-		return $result;
+		return $flatten 
+			? $this->flattenRelationships($result) 
+			: $result;
 	}
 
-	public function first()
+	public function first(bool $flatten=true)
 	{
 		$result = $this->model->first();
 
-		$result = $this->flattenRelationships($result);
-		
-		$q = new gallery;
+		$this->reset();
 
-		$this->defineModel($q->query());
+		return $flatten 
+			? $this->flattenRelationships($result) 
+			: $result;
+	}
 
-		return $result;
+	public function find($id, bool $flatten=true)
+	{
+		$result = $this->model->find($id);
+
+		$this->reset();
+
+		return $flatten 
+			? $this->flattenRelationships($result) 
+			: $result;
 	}
 }

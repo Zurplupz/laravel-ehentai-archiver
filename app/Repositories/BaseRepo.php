@@ -13,9 +13,4 @@ abstract class BaseRepo
 	{
 		$this->model = $model;
 	}
-
-	protected function store()
-	{
-
-	}
 }
