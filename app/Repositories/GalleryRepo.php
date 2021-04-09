@@ -8,6 +8,7 @@ use App\tag;
 use App\gallery_tagging;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 /**
  * 
@@ -192,6 +193,28 @@ class GalleryRepo extends BaseRepo
 		$data->group_list = $group_list;
 
 		return $data;
+	}
+
+	public function handleRequest(Request $request) :self
+	{
+		$data = $request->all();
+
+		$wheres = ['rating'];
+		$likes = ['gid','token','category'];
+
+		foreach ($data as $k => $v) {
+			if (in_array($k, $wheres)) {
+				$this->model->where($k, '=', $v);
+				continue;
+			}
+
+			if (in_array($k, $likes)) {
+				$this->model->where($k, 'like', $v);
+				continue;
+			}
+		}
+
+		return $this;
 	}
 
 	protected function reset()
