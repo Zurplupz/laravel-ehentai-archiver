@@ -40,7 +40,15 @@ class ExhentaiClient extends Client
 	{
 		$this->result_type = 'text';
 
-		$response = $this->request($this->archives_url, compact('query'));
+		$data = [
+			'query' => $query,
+			'form_params' => [
+				'dltype' => 'org',
+				'dlcheck' => 'Download Original Archive',
+			]
+		];
+
+		$response = $this->request($this->archives_url, $data);
 		
 		$this->result_type = 'json';
 
