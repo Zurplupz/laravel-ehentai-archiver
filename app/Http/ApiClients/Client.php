@@ -8,6 +8,7 @@ namespace App\Http\ApiClients;
 abstract class Client
 {
 	protected $guzzle;
+	protected $cookies;
 	protected $base_uri;
 	protected $auth;
 	protected $status;
@@ -33,6 +34,10 @@ abstract class Client
 				$data['debug'] = $debug;
 			}
 
+			if (!empty($this->cookies)) {
+				$data['cookies'] = $this->cookies;
+			}
+
 			$res = $this->guzzle->request($method, $path, $data);
 
 			$this->status = $res->getStatusCode();
@@ -40,6 +45,9 @@ abstract class Client
 			switch ($this->result_type) {
 				case 'json': 
 					return json_decode($res->getBody(), true);
+
+				case 'text':
+					return $res->getBody()->getContents();
 				
 				default: return true;
 			}
