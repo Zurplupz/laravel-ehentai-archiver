@@ -48,7 +48,7 @@ class ExhentaiClient extends Client
 			]
 		];
 
-		$response = $this->request($this->archives_url, $data);
+		$response = $this->request($this->archives_url, $data, 'POST');
 		
 		$this->result_type = 'json';
 
