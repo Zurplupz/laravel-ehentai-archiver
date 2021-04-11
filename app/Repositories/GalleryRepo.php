@@ -209,7 +209,7 @@ class GalleryRepo extends BaseRepo
 			}
 
 			if (in_array($k, $likes)) {
-				$this->model->where($k, 'like', $v);
+				$this->model->where($k, 'like', "%{$v}%");
 				continue;
 			}
 		}
