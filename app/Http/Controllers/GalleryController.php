@@ -7,6 +7,7 @@ use App\Http\ApiClients\ExhentaiClient;
 use App\Repositories\GalleryRepo;
 use App\Http\Requests\ArchiveRequest;
 use App\Http\Requests\GalleryRequest;
+use App\Jobs\DownloadGallery;
 
 class GalleryController extends Controller
 {
@@ -101,6 +102,12 @@ class GalleryController extends Controller
             $response[$gid] = [
                 'status' => 'pending'
             ];
+
+            DownloadGallery::dispatch([
+                'gid' => $gid,
+                'token' => $metadata['token'],
+                'archiver_key' => $metadata['archiver_key']
+            ]); 
         }
 
         return response()->json($response);
