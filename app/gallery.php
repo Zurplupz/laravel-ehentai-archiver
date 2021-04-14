@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class gallery extends Model
 {
+	protected $hidden = ['gallery_group','gallery_tagging','archiver_key'];
 	protected $fillable = ['title','favorited','rating'];
 
 	function __construct()
@@ -18,8 +19,6 @@ class gallery extends Model
 			return !in_array($v, $this->fillable);
 		});
 	}
-
-	protected $hidden = ['gallery_group','gallery_tagging'];
 
 	public function gallery_group()
 	{
