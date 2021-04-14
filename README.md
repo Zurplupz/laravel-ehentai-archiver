@@ -9,18 +9,21 @@ Top ones are most likely to come sooner.
 - [x] Request to archive from favorites page 
 - [ ] Show feedback of succesful archiving to user in browser 
 - [x] Get official gallery metadata 
-- [x] Browse archived galleries through API 
+- [x] Browse archived galleries through API
+- [ ] Search by name and tags 
 - [ ] Download and store gallery from official archives
 - [ ] Keep track of archived galleries and show a badge on the exhentai list
 - [ ] Request to archive from gallery page and search page 
 - [ ] Manually add gallery
 - [ ] Archive galleries on background (queue jobs)
 - [ ] Synchronize gallery with exhentai
+- [ ] Track EH-Credits and give warning when amount isn't enough to download gallery
 - [ ] Basic authorization
 - [ ] Gallery viewer and browser
 - [ ] Download torrent
 - [ ] Scheduled downloads
 - [ ] Mobile mode gallery viewer
+- [ ] Add public and private paths to galleries
 
 ## Requirements
 - Apache2 and MySQL
