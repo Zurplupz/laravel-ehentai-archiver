@@ -36,7 +36,7 @@ class ExhentaiClient extends Client
 		return $this->request($this->api_url, compact('json'), 'POST');
 	}
 
-	public function requestArchive(array $query, string $resolution)
+	public function requestArchive(array $query, string $resolution='resampled')
 	{
 		$this->result_type = 'text';
 
