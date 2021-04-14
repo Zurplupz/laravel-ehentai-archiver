@@ -28,7 +28,7 @@ class GalleryController extends Controller
     {
         $response = $this->galleries->handleRequest($request)->get();
     
-        return response($response->toJson())->headers('Content-Type: application/json');
+        return response($response->toJson())->header('Content-Type', 'application/json');
     }
 
     /**
