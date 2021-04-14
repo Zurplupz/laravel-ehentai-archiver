@@ -36,15 +36,21 @@ class ExhentaiClient extends Client
 		return $this->request($this->api_url, compact('json'), 'POST');
 	}
 
-	public function requestArchive(array $query)
+	public function requestArchive(array $query, string $resolution)
 	{
 		$this->result_type = 'text';
+
+		// todo: allow to choose default resolution
+		$valid = [
+			'resampled' => 'res',
+			'original' => 'org'
+		];
 
 		$data = [
 			'query' => $query,
 			'form_params' => [
 				'dltype' => 'org',
-				'dlcheck' => 'Download Original Archive',
+				'dlcheck' => $valid[$resolution] ?? 'res',
 			]
 		];
 
@@ -53,5 +59,12 @@ class ExhentaiClient extends Client
 		$this->result_type = 'json';
 
 		return $response;
+	}
+
+	public function downloadGallery(string $url, string $save_path)
+	{
+		$this->result_type = 'text';
+
+		return $response->request($url, ['sink' => $save_path]);
 	}
 }
