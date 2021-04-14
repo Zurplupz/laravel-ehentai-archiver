@@ -30,9 +30,9 @@ class GalleryRepo extends BaseRepo
 		return $this;
 	}
 
-	public function archived() :self
+	public function archived(bool $bool=true) :self
 	{
-		$this->model->where('archived', 1);
+		$this->model->where('archived', $bool);
 
 		return $this;
 	}
