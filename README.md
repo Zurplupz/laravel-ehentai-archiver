@@ -11,7 +11,7 @@ Top ones are most likely to come sooner.
 - [x] Get official gallery metadata 
 - [x] Browse archived galleries through API
 - [ ] Search by name and tags 
-- [ ] Download and store gallery from official archives
+- [x] Download and store gallery from official archives
 - [ ] Keep track of archived galleries and show a badge on the exhentai list
 - [ ] Request to archive from gallery page and search page 
 - [ ] Manually add gallery
@@ -35,7 +35,12 @@ Top ones are most likely to come sooner.
 1. `git clone repo@ssh exhentai-archiver && cd exhentai-archiver`
 2. `composer install`
 3. Edit .env file with database login and name of database to use, defaults: root, no pass, exhentai
-4. `php artisan migrate`
+4. ```bash
+	php artisan queue:table 
+	php artisan queue:failed-table
+	php artisan migrate
+	php artisan queue:work
+	```
 5. Install an userscript extension on your browser (I recommend ViolentMonkey)
 6. Edit `var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'`, replace `lr/ehentai-archiver/` with the directory where you installed the project
 7. Add the userscript.js to the extension
