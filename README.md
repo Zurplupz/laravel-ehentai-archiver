@@ -10,7 +10,7 @@ Top ones are most likely to come sooner.
 - [ ] Show feedback of succesful archiving to user in browser 
 - [x] Get official gallery metadata 
 - [x] Browse archived galleries through API
-- [ ] Search by name and tags 
+- [x] Search by name and tags 
 - [x] Download and store gallery from official archives
 - [ ] Keep track of archived galleries and show a badge on the exhentai list
 - [ ] Request to archive from gallery page and search page 
