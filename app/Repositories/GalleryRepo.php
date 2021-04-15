@@ -39,24 +39,22 @@ class GalleryRepo extends BaseRepo
 
 	public function inGroup(string $name) :self
 	{
-		$this->model->with([
-			'gallery_group.group' => function ($query) 
-			{
-				$query->where('name', 'like', "{$name}");
+		$this->model->whereHas('gallery_group.group', 
+			function ($query) use ($name) {
+				$query->where('name', 'like', "%{$name}%");
 			}
-		]);
+		);
 
 		return $this;
 	}
 
 	public function tagged(string $name) :self
 	{
-		$this->model->with([
-			'gallery_tagging.tag' => function ($query) 
-			{
-				$query->where('name', 'like', "{$name}");
+		$this->model->whereHas('gallery_tagging.tag', 
+			function ($query) use ($name) {
+				$query->where('name', 'like', "%{$name}%");
 			}
-		]);
+		);
 
 		return $this;
 	}
@@ -172,6 +170,10 @@ class GalleryRepo extends BaseRepo
 
 		$data->gallery_tagging->each(
 			function ($relationship) use (&$tag_list) {
+				if (empty($relationship->tag)) {
+					return;
+				}
+
 				$id = $relationship->tag->id;
 
 				$tag_list[$id] = $relationship->tag->name;
@@ -184,6 +186,10 @@ class GalleryRepo extends BaseRepo
 
 		$data->gallery_group->each(
 			function ($relationship) use (&$group_list) {
+				if (empty($relationship->group)) {
+					return;
+				}
+
 				$id = $relationship->group->id;
 
 				$group_list[$id] = $relationship->group->name;
@@ -203,14 +209,40 @@ class GalleryRepo extends BaseRepo
 		$likes = ['gid','token','category'];
 
 		foreach ($data as $k => $v) {
-			if (in_array($k, $wheres)) {
-				$this->model->where($k, '=', $v);
-				continue;
-			}
+			switch (true) {
+				case in_array($k, $wheres):
+					$this->model->where($k, '=', $v);
+					break;
 
-			if (in_array($k, $likes)) {
-				$this->model->where($k, 'like', "%{$v}%");
-				continue;
+				case in_array($k, $likes):
+					$this->model->where($k, 'like', "%{$v}%");
+					break;
+
+				case $k === 'tags': {
+					if (strpos($v,',') !== false) {
+						$tags = array_filter(explode(',', $v));
+					} else {
+						$tags = [$v];
+					}
+
+					foreach ($tags as $tag) $this->tagged($tag);
+
+					break;
+				}
+
+				case $k === 'groups': {
+					if (strpos($v,',') !== false) {
+						$groups = array_filter(explode(',', $v));
+					} else {
+						$groups = [$v];
+					}
+
+					foreach ($groups as $group) $this->inGroup($group);
+
+					break;
+				}
+				
+				default: break;
 			}
 		}
 
