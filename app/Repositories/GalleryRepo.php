@@ -206,7 +206,7 @@ class GalleryRepo extends BaseRepo
 		$data = $request->all();
 
 		$wheres = ['rating'];
-		$likes = ['gid','token','category'];
+		$likes = ['gid','token','category','title'];
 
 		foreach ($data as $k => $v) {
 			switch (true) {

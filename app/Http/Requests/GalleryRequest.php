@@ -29,7 +29,9 @@ class GalleryRequest extends FormRequest
             'gid' => ['numeric','min:4'],
             'token' => ['string','min:4'],
             'category' => ['string','min:3'],
-            'rating' => ['string', 'min:3']
+            'rating' => ['string', 'min:3'],
+            'title' => ['string', 'min:3'],
+            'tags' => ['string', 'min:3']
         ];
     }
 }
