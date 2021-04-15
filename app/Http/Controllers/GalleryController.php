@@ -16,7 +16,6 @@ class GalleryController extends Controller
 
     function __construct()
     {
-        $this->exhentai = new ExhentaiClient;
         $this->galleries = new GalleryRepo;
     }
 
@@ -82,8 +81,10 @@ class GalleryController extends Controller
         if (empty($gid_token_pairs)) {
             return response()->json($response);
         }
+
+        $exhentai = new ExhentaiClient;
             
-        $r = $this->exhentai->getGalleriesMetadata($gid_token_pairs);
+        $r = $exhentai->getGalleriesMetadata($gid_token_pairs);
 
         foreach ($r['gmetadata'] as $metadata) {
             $gid = $metadata['gid'];
@@ -121,7 +122,9 @@ class GalleryController extends Controller
      */
     public function show($id)
     {
-        //
+        $gallery = $this->galleries->find($id);
+
+        return response($gallery->toJson())->header('Content-Type','application/json');
     }
 
     /**
