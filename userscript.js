@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name     E-hentai favorite galleries archiver
 // @author	 Zurplupz - https://github.com/Zurplupz
-// @version  0.0.2
+// @version  0.1.0
 // @match      *://exhentai.org/*
 // @match      *://e-hentai.org/*
 // @resource style http://localhost/lr/ehentai-archiver/public/css/eh-archiver.css
@@ -13,9 +13,11 @@ const style = GM_getResourceText("style");
 GM_addStyle(style);
 
 var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'
-const debug = true
+const debug = false
 
 docReady(function () {
+	displayGalleriesStatus()
+
 	const form = document.querySelector('form[name="favform"]')
 
 	// on click confirm button @ favorites
@@ -86,10 +88,10 @@ docReady(function () {
 		}
 	})
 
-	// ad archive to options selector
+	// add archive to options selector
 	const action_selector = document.querySelector('[name="ddact"]')
 
-	if (action_selectort) {
+	if (action_selector) {
 		const opt = document.createElement('option');
 		opt.value = 'archive'
 		opt.innerHTML = 'Archive'
@@ -294,5 +296,60 @@ function addBadge(el, gallery_mode, status) {
 		}
 
 		default: return;
+	}
+}
+
+async function displayGalleriesStatus() {
+	if (!api_url) {
+		alert('API URL not set in UserScript')
+		return
+	}
+
+	const mode = document.querySelector('#dms select').value
+
+	if (!mode) {
+		throw new Error('Cant find gallery mode selector')
+	}
+
+	const gid_list = []
+	let links;
+
+	switch (mode) {
+		case 't' : break;
+
+		case 'm' :
+			links = document.querySelectorAll('.glname a')
+			break;
+
+		default: {
+			throw new Error('invalid or not supported mode: ' + mode)
+		}
+	}
+
+	links.forEach(function (v, k) {
+		const url = v.getAttribute("href")
+		
+		if (!url) return
+
+		const gid = url.split('/')[4]
+
+		if (!gid) return
+
+		this.push(gid)
+
+	}, gid_list);
+
+	const gid_query = gid_list.map((v, k) => { return 'gids[]='+ v }).join('&');
+
+	const url = api_url + 'galleries_status?' + gid_query
+
+	try {
+		const response = await apiRequest(url, { method : 'post' })
+		
+		showFeedback(response)
+	}
+
+	catch (e) {
+		console.error(e)
 	}
 }
