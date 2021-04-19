@@ -13,3 +13,5 @@ yarn-error.log
 .DB_store
 desktop.ini
 *.sublime*
+*.zip
+*.rar
