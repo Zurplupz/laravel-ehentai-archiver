@@ -31,6 +31,33 @@ class GalleryController extends Controller
         return response($response->toJson())->header('Content-Type', 'application/json');
     }
 
+    public function archiveStatus(Request $request)
+    {
+        $cols = ['id','gid','token','archived','archive_path'];
+
+        $list = $this->galleries->select($cols)->get();
+
+        if (empty($list)) {
+            return;
+        }
+
+        $list = $list->toArray();
+        $response = [];
+
+        foreach ($list as $gallery) {
+            $status = 'pending';
+
+            // todo: add status missing files
+            if ($gallery['archived']===1 && !empty($gallery['archive_path'])) {
+                $status = 'archived';
+            }
+
+            $response[$gallery['gid']] = compact('status');
+        }
+
+        return response()->json($response);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

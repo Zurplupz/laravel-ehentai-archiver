@@ -20,3 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::apiResources([
     'galleries' => 'GalleryController'
 ]);
+
+Route::middleware('api')
+	->namespace('GalleryController')
+	->get('/galleries_status', 'GalleryController@archiveStatus')
+	->name('galleries.status');
