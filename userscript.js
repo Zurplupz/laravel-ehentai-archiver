@@ -86,12 +86,15 @@ docReady(function () {
 		}
 	})
 
+	// ad archive to options selector
 	const action_selector = document.querySelector('[name="ddact"]')
 
-	let opt = document.createElement('option');
-	opt.value = 'archive'
-	opt.innerHTML = 'Archive'
-	action_selector.appendChild(opt)
+	if (action_selectort) {
+		const opt = document.createElement('option');
+		opt.value = 'archive'
+		opt.innerHTML = 'Archive'
+		action_selector.appendChild(opt)
+	}
 
 	console.log('done')
 })

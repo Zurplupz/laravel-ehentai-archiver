@@ -1,0 +1,31 @@
+.gal-status-label { 
+	background-color: white;
+	margin: 0px 5px 0px 0px;
+	padding: 2px;
+	font-weight: bold;
+	white-space: nowrap;
+	display: inline;
+	border-radius: 3px;
+}
+
+.gal-status-label ~ a { 
+	display: inline-table;
+}
+
+.gal-archived {
+	color: black;
+}
+
+.gal-pending {
+	background-color: white;
+	color: #246ba2;
+}
+
+.gal-error {
+	color: #c80028;
+}
+
+.gal-unknown {
+	background-color: mediumpurple;
+	color: white;
+}
