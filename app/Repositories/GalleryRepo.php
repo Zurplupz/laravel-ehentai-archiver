@@ -61,6 +61,17 @@ class GalleryRepo extends BaseRepo
 		return $this;
 	}
 
+	public function gids(array $gids) :self
+	{
+		$gids = array_filter($gids);
+
+		if ($gids) {
+			$this->model->whereIn('gid', $gids);
+		}
+
+		return $this;
+	}
+
 	public function archived(bool $bool=true) :self
 	{
 		$this->model->where('archived', $bool);

@@ -33,9 +33,11 @@ class GalleryController extends Controller
 
     public function archiveStatus(Request $request)
     {
+        $gids = $request->gids ?? [];
+
         $cols = ['id','gid','token','archived','archive_path'];
 
-        $list = $this->galleries->select($cols)->get();
+        $list = $this->galleries->gids($gids)->select($cols)->get();
 
         if (empty($list)) {
             return;

@@ -23,5 +23,5 @@ Route::apiResources([
 
 Route::middleware('api')
 	->namespace('GalleryController')
-	->get('/galleries_status', 'GalleryController@archiveStatus')
+	->post('/galleries_status', 'GalleryController@archiveStatus')
 	->name('galleries.status');
