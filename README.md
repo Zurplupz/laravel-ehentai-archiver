@@ -7,12 +7,12 @@ This is an exhentai gallery archiver based on Laravel and inspired by [this proj
 Top ones are most likely to come sooner.
 
 - [x] Request to archive from favorites page 
-- [ ] Show feedback of succesful archiving to user in browser 
+- [x] Show feedback of succesful archiving to user in browser 
 - [x] Get official gallery metadata 
 - [x] Browse archived galleries through API
 - [x] Search by name and tags 
 - [x] Download and store gallery from official archives
-- [ ] Keep track of archived galleries and show a badge on the exhentai list
+- [x] Keep track of archived galleries and show a badge on the exhentai list
 - [ ] Request to archive from gallery page and search page 
 - [ ] Manually add gallery
 - [ ] Archive galleries on background (queue jobs)
