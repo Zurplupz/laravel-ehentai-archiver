@@ -1,12 +1,19 @@
 // ==UserScript==
 // @name     E-hentai favorite galleries archiver
 // @author	 Zurplupz - https://github.com/Zurplupz
-// @version  0.0.1
-// @grant    none
+// @version  0.0.2
 // @match      *://exhentai.org/*
 // @match      *://e-hentai.org/*
+// @resource style http://localhost/lr/ehentai-archiver/public/css/eh-archiver.css
+// @grant    GM_addStyle
+// @grant    GM_getResourceText
 // ==/UserScript==
+
+const style = GM_getResourceText("style");
+GM_addStyle(style);
+
 var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'
+const debug = true
 
 docReady(function () {
 	const form = document.querySelector('form[name="favform"]')
@@ -47,18 +54,35 @@ docReady(function () {
 
 		const body = JSON.stringify({ galleries })
 
+		let inputs = document.querySelectorAll('input,select,option')
+
+		inputs.disabled = true
+
+		let url = api_url + 'galleries'
+
+		if (debug) {
+			url += '?debug=true'
+		} 
+
 		try {
-			let response = await apiRequest(api_url + 'galleries', {
-				body, method : 'post', 
-				headers : { 'Content-Type': 'application/json' }
+			let response = await apiRequest(url, {
+				body, method : 'post',
+				headers : {
+					'Content-Type': 'application/json',
+					'Accept' : 'application/json' 
+				}
 			})
 
-			console.log(response)
+			showFeedback(response)
 		}
 
 		catch (e) {
 			alert(e)
 			console.error(e)
+		}
+
+		finally {
+			inputs.disabled = false
 		}
 	})
 
@@ -110,19 +134,50 @@ async function apiRequest(url, params={}, expect='json') {
 }
 
 function findGalleryData(value) {
+	try {
+		const gallery = findGalleryElement(value)
+		const el = gallery.wrapper
+
+		switch (gallery.mode) {
+			case 't' :
+			return {
+				url : el.firstElementChild.firstElementChild.getAttribute('href'),
+				name : el.querySelector('.glink').innerText
+			}
+
+			case 'm' :
+			return { 
+				url : el.querySelector('.glname a').getAttribute('href'),
+				name : el.querySelector('.glink').innerText,
+				category : el.querySelector('.glcat .cs').innerText,
+				favorited : el.querySelector('.glfav').innerText,
+				posted : el.querySelector('.gl2m').lastElementChild.innerText,
+				group : el.querySelector('.gl2m').lastElementChild.getAttribute('title')
+			}
+
+			default: break;
+		}
+	}
+
+	catch (e) { 
+		console.error(e)
+		return 
+	}
+}
+
+function findGalleryElement(value) {
 	let selector = 'input[value="' + value + '"]'
 
 	const input = document.querySelector(selector)
 
-	if (!input) { 
-		console.error('Not found input with name: ' + selector)
-		return 
+	if (!input) {
+		throw new Error('Not found input with name: ' + selector)
 	}
 
-	let mode = document.querySelector('#dms select').value
+	const mode = document.querySelector('#dms select').value
 
 	if (!mode) {
-		throw 'Cant find gallery mode selector'
+		throw new Error('Cant find gallery mode selector')
 	}
 
 	switch (mode) {
@@ -130,37 +185,111 @@ function findGalleryData(value) {
 			let wrapper =  input.closest('.glname')
 
 			if (!wrapper) {
-				console.error('Not found wrapper for field: ' + value)
-				return ''
+				throw new Error('Not found wrapper for field: ' + value)
 			}
 
-			return {
-				url : wrapper.firstElementChild.firstElementChild.getAttribute('href'),
-				name : wrapper.querySelector('.glink').innerText
-			}
+			return { wrapper, mode }
 		}
 
 		case 'm' : {
-			let row =  input.closest('tr')
+			let wrapper =  input.closest('tr')
 
-			if (!row) {
-				console.error('Not found wrapper for field: ' + value)
-				return ''
+			if (!wrapper) {
+				throw new Error('Not found wrapper for field: ' + value)
 			}
 
-			return { 
-				url : row.querySelector('.glname a').getAttribute('href'),
-				name : row.querySelector('.glink').innerText,
-				category : row.querySelector('.glcat .cs').innerText,
-				favorited : row.querySelector('.glfav').innerText,
-				posted : row.querySelector('.gl2m').lastElementChild.innerText,
-				group : row.querySelector('.gl2m').lastElementChild.getAttribute('title')
-			}
+			return { wrapper, mode }
 		}
 
 		default: {
-			console.error('invalid or not supported mode')
-			return ''
+			throw new Error('invalid or not supported mode: ' + mode)
 		}
+	}
+}
+
+function showFeedback(api_response) {
+	if (api_response.errors) return
+
+	for (let id in api_response) {
+		try {
+			const gallery = findGalleryElement(id)
+			const status = api_response[id]['status']
+
+			addBadge(gallery.wrapper, gallery.mode, status)
+		}
+
+		catch (e) {
+			console.error(e)
+			continue
+		}
+	}
+}
+
+function statusLabel(status) {
+	const label = document.createElement('label')
+	label.classList.add('gal-status-label')
+
+	switch (status) {
+		case 'archived': {
+			label.innerText = 'Archived'
+			label.classList.add('gal-archived')
+			break;
+		}
+		case 'pending': {
+			label.innerText = 'Pending'
+			label.classList.add('gal-pending')
+			break;
+		}
+		case 'error': {
+			label.innerText = 'Error'
+			label.classList.add('gal-error')
+			break;
+		}
+		case 'not_found': {
+			label.innerText = 'Not found'
+			label.classList.add('gal-unknown')
+			break;
+		}
+
+		default: 
+			throw new Error('status not valid: ' + status)
+			break;
+	}
+
+	label.innerText += ' ' + emoji(status)
+
+	return label
+}
+
+function emoji(name) {
+	const emojis = {
+		archive : 0x1F4C1,
+		pending : 0x1F504,
+		error : 0x274C,
+		not_found : 0x2753
+	}
+
+	if (!emojis[name]) {
+		return ''
+	}
+
+	return String.fromCodePoint(emojis[name])
+}
+
+function addBadge(el, gallery_mode, status) {
+
+	let badge = statusLabel(status)
+	
+	switch (gallery_mode) {
+		case 't' : {
+			return;
+		}
+
+		case 'm' : {
+			el.querySelector('.glname').prepend(badge)
+			return;
+		}
+
+		default: return;
 	}
 }
