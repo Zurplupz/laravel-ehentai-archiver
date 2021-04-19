@@ -16,12 +16,42 @@ use Illuminate\Http\Request;
 class GalleryRepo extends BaseRepo
 {
 	protected $select;
+	protected $cols;
 	
 	function __construct()
 	{
 		$q = new gallery;
 
 		$this->defineModel($q->query());	
+	}
+
+	public function select(array $selected) :self
+	{
+		if (empty($this->cols)) {
+			$this->cols = \Schema::getColumnListing('galleries');
+		}
+
+		if (empty($this->select)) {
+			$this->select = [];
+		}
+
+		$selected = array_filter($selected);
+
+		foreach ($selected as $k => $v) {
+			if (!in_array($v, $this->cols) || in_array($v, $this->select))
+			{
+				unset($selected[$k]);
+				continue;
+			}
+
+			$this->select[] = $v;
+		}
+
+		if ($selected) {
+			$this->model->addSelect($selected);
+		}
+
+		return $this;
 	}
 
 	public function gid(string $gid) :self
@@ -259,17 +289,7 @@ class GalleryRepo extends BaseRepo
 		if (!empty($request->_fields)) {
 			// todo: model should be an string
 			// todo: getTable method should return columns
-			$cols = \Schema::getColumnListing('galleries');
-
-			$this->select = array_filter($request->_fields, 
-				function ($v) use ($cols) {
-					return in_array($v, $cols);
-				}
-			);
-
-			if ($this->select) {
-				$this->model->addSelect(implode(',', $this->select));
-			}
+			$this->select($request->_fields);
 		}
 
 		return $this;
