@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
  */
 class GalleryRepo extends BaseRepo
 {
+	protected $select;
 	
 	function __construct()
 	{
@@ -166,6 +167,15 @@ class GalleryRepo extends BaseRepo
 			return $data;
 		}
 
+		$quit = !empty($this->select) && (
+			!in_array('tags', $this->select) || 
+			!in_array('groups', $this->select)
+		);
+
+		if ($quit) {
+			return $data;
+		}
+
 		$tag_list = [];
 
 		$data->gallery_tagging->each(
@@ -243,6 +253,22 @@ class GalleryRepo extends BaseRepo
 				}
 				
 				default: break;
+			}
+		}
+
+		if (!empty($request->_fields)) {
+			// todo: model should be an string
+			// todo: getTable method should return columns
+			$cols = \Schema::getColumnListing('galleries');
+
+			$this->select = array_filter($request->_fields, 
+				function ($v) use ($cols) {
+					return in_array($v, $cols);
+				}
+			);
+
+			if ($this->select) {
+				$this->model->addSelect(implode(',', $this->select));
 			}
 		}
 

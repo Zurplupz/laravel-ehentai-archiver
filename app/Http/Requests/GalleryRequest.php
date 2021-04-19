@@ -31,7 +31,11 @@ class GalleryRequest extends FormRequest
             'category' => ['string','min:3'],
             'rating' => ['string', 'min:3'],
             'title' => ['string', 'min:3'],
-            'tags' => ['string', 'min:3']
+            'tags' => ['string', 'min:3'],
+            'groups' => ['string', 'min:3'],
+
+            '_fields' => ['array','min:1'],
+            '_fields.*' => ['string']
         ];
     }
 }
