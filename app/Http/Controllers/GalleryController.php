@@ -51,6 +51,8 @@ class GalleryController extends Controller
     {
         $data = $request->json()->all();
 
+        $debug = $request->debug ?? false;
+
         $gid_token_pairs = [];
         $response = [];
 
@@ -103,6 +105,8 @@ class GalleryController extends Controller
             $response[$gid] = [
                 'status' => 'pending'
             ];
+
+            if ($debug) continue;
 
             DownloadGallery::dispatch([
                 'gid' => $gid,
