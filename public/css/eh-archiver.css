@@ -13,19 +13,19 @@
 }
 
 .gal-archived {
-	color: black;
+	color: black!important;
 }
 
 .gal-pending {
 	background-color: white;
-	color: #246ba2;
+	color: #246ba2!important;
 }
 
 .gal-error {
-	color: #c80028;
+	color: #c80028!important;
 }
 
 .gal-unknown {
 	background-color: mediumpurple;
-	color: white;
+	color: white!important;
 }

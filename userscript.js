@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name     E-hentai favorite galleries archiver
 // @author	 Zurplupz - https://github.com/Zurplupz
-// @version  0.1.0
+// @version  0.2.0
 // @match      *://exhentai.org/*
 // @match      *://e-hentai.org/*
-// @resource style http://localhost/lr/ehentai-archiver/public/css/eh-archiver.css
+// @resource style http://localhost/lr/ehentai-archiver/public/css/eh-archiver.css?v=GM_info.script.version
 // @grant    GM_addStyle
 // @grant    GM_getResourceText
 // ==/UserScript==
+// todo: add support for extended mode
 
 const style = GM_getResourceText("style");
 GM_addStyle(style);
@@ -185,8 +186,8 @@ function findGalleryElement(value) {
 		throw new Error('Cant find gallery mode selector')
 	}
 
-	switch (mode) {
-		case 't' : {
+	switch (true) {
+		case mode === 't' : {
 			let wrapper =  input.closest('.glname')
 
 			if (!wrapper) {
@@ -196,7 +197,7 @@ function findGalleryElement(value) {
 			return { wrapper, mode }
 		}
 
-		case 'm' : {
+		case mode !== 'e' : {
 			let wrapper =  input.closest('tr')
 
 			if (!wrapper) {
@@ -207,7 +208,7 @@ function findGalleryElement(value) {
 		}
 
 		default: {
-			throw new Error('invalid or not supported mode: ' + mode)
+			throw new Error('invalid or not supported mode: extended')
 		}
 	}
 }
@@ -285,17 +286,32 @@ function addBadge(el, gallery_mode, status) {
 
 	let badge = statusLabel(status)
 	
-	switch (gallery_mode) {
-		case 't' : {
+	switch (true) {
+		case gallery_mode === 't' : {
+			el.closest('.gl1t').querySelector('.gl6t').prepend(badge)
 			return;
 		}
 
-		case 'm' : {
+		case gallery_mode === 'p' : {
+			badge.style.float = 'left' 
+			el.querySelector('.gltm').prepend(badge)
+			return;
+		}
+
+		case gallery_mode === 'l': {
+			badge.style.float = 'left'
+			el.querySelector('.glink + div').prepend(badge)
+			return;
+		}
+
+		case gallery_mode !== 'e' : {
 			el.querySelector('.glname').prepend(badge)
 			return;
 		}
 
-		default: return;
+		default: {
+			throw new Error('invalid or not supported mode: extended')
+		}
 	}
 }
 
@@ -314,16 +330,10 @@ async function displayGalleriesStatus() {
 	const gid_list = []
 	let links;
 
-	switch (mode) {
-		case 't' : break;
-
-		case 'm' :
-			links = document.querySelectorAll('.glname a')
-			break;
-
-		default: {
-			throw new Error('invalid or not supported mode: ' + mode)
-		}
+	if (mode != 'e') {
+		links = document.querySelectorAll('.glname a')
+	} else {
+		throw new Error('invalid or not supported mode: extended')
 	}
 
 	links.forEach(function (v, k) {

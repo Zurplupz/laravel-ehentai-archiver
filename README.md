@@ -6,7 +6,7 @@ This is an exhentai gallery archiver based on Laravel and inspired by [this proj
 ## Features
 Top ones are most likely to come sooner.
 
-- [x] Request to archive from favorites page 
+- [x] Request to archive from favorites page (Supported modes: Minimal)
 - [x] Show feedback of succesful archiving to user in browser 
 - [x] Get official gallery metadata 
 - [x] Browse archived galleries through API
