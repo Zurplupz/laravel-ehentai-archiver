@@ -151,6 +151,16 @@ function findGalleryData(value) {
 				name : el.querySelector('.glink').innerText
 			}
 
+			case 'l':
+			return {
+				url : el.querySelector('.glname a').getAttribute('href'),
+				name : el.querySelector('.glink').innerText,
+				category : el.querySelector('.glcat .cn').innerText,
+				favorited : el.querySelector('.glfav').innerText.replace(/\n+/g, ' '),
+				posted : el.querySelector('div[id^=posted]').innerHTML,
+				group : el.querySelector('div[id^=posted]').getAttribute('title')
+			}
+
 			case 'm' :
 			return { 
 				url : el.querySelector('.glname a').getAttribute('href'),
@@ -161,7 +171,11 @@ function findGalleryData(value) {
 				group : el.querySelector('.gl2m').lastElementChild.getAttribute('title')
 			}
 
-			default: break;
+			
+
+			default: {
+				throw new Error('invalid or not supported mode: ' + gallery.mode)
+			}
 		}
 	}
 
