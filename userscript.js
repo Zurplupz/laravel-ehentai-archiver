@@ -283,7 +283,7 @@ function statusLabel(status) {
 
 function emoji(name) {
 	const emojis = {
-		archive : 0x1F4C1,
+		archived : 0x1F4C1,
 		pending : 0x1F504,
 		error : 0x274C,
 		not_found : 0x2753
