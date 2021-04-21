@@ -18,15 +18,11 @@ class GalleryRepo extends BaseRepo
 	protected $select;
 	protected $cols;
 	
-	function __construct($with_relationships=true)
+	function __construct()
 	{
 		$q = new gallery;
 
 		$this->defineModel($q);
-
-		if ($with_relationships) {
-			$this->model->with('gallery_group.group')->with('gallery_tagging.tag');
-		}
 	}
 
 	public function gid(string $gid) :self
@@ -217,6 +213,16 @@ class GalleryRepo extends BaseRepo
 			// todo: model should be an string
 			// todo: getTable method should return columns
 			$this->select($request->_fields);
+
+			if (!empty($request_fields['tags']) && empty($data['tags'])) 
+			{
+				$this->model->with('gallery_tagging.tag');
+			}
+
+			if (!empty($request_fields['groups']) && empty($data['groups'])) 
+			{
+				$this->model->with('gallery_groups.group');
+			}
 		}
 
 		return $this;
