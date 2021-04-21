@@ -22,36 +22,7 @@ class GalleryRepo extends BaseRepo
 	{
 		$q = new gallery;
 
-		$this->defineModel($q->query());	
-	}
-
-	public function select(array $selected) :self
-	{
-		if (empty($this->cols)) {
-			$this->cols = \Schema::getColumnListing('galleries');
-		}
-
-		if (empty($this->select)) {
-			$this->select = [];
-		}
-
-		$selected = array_filter($selected);
-
-		foreach ($selected as $k => $v) {
-			if (!in_array($v, $this->cols) || in_array($v, $this->select))
-			{
-				unset($selected[$k]);
-				continue;
-			}
-
-			$this->select[] = $v;
-		}
-
-		if ($selected) {
-			$this->model->addSelect($selected);
-		}
-
-		return $this;
+		$this->defineModel($q);
 	}
 
 	public function gid(string $gid) :self
@@ -304,45 +275,5 @@ class GalleryRepo extends BaseRepo
 		}
 
 		return $this;
-	}
-
-	protected function reset()
-	{		
-		$q = new gallery;
-
-		$this->defineModel($q->query());
-	}
-
-	public function get(bool $flatten=true)
-	{
-		$result = $this->model->get();
-
-		$this->reset();
-
-		return $flatten 
-			? $this->flattenRelationships($result) 
-			: $result;
-	}
-
-	public function first(bool $flatten=true)
-	{
-		$result = $this->model->first();
-
-		$this->reset();
-
-		return $flatten 
-			? $this->flattenRelationships($result) 
-			: $result;
-	}
-
-	public function find($id, bool $flatten=true)
-	{
-		$result = $this->model->find($id);
-
-		$this->reset();
-
-		return $flatten 
-			? $this->flattenRelationships($result) 
-			: $result;
 	}
 }
