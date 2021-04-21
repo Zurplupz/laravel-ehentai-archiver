@@ -164,65 +164,6 @@ class GalleryRepo extends BaseRepo
 		}
 	}
 
-	protected function flattenRelationships($data)
-	{
-		if (!$data instanceof Model) 
-		{
-			if (!$data instanceof Collection) {
-				return $data;
-			}
-
-			$data->each(function ($model) {
-				$this->flattenRelationships($model);
-			});
-
-			return $data;
-		}
-
-		$quit = !empty($this->select) && (
-			!in_array('tags', $this->select) || 
-			!in_array('groups', $this->select)
-		);
-
-		if ($quit) {
-			return $data;
-		}
-
-		$tag_list = [];
-
-		$data->gallery_tagging->each(
-			function ($relationship) use (&$tag_list) {
-				if (empty($relationship->tag)) {
-					return;
-				}
-
-				$id = $relationship->tag->id;
-
-				$tag_list[$id] = $relationship->tag->name;
-			}
-		);
-
-		$data->tag_list = $tag_list;
-
-		$group_list = [];
-
-		$data->gallery_group->each(
-			function ($relationship) use (&$group_list) {
-				if (empty($relationship->group)) {
-					return;
-				}
-
-				$id = $relationship->group->id;
-
-				$group_list[$id] = $relationship->group->name;
-			}
-		);
-
-		$data->group_list = $group_list;
-
-		return $data;
-	}
-
 	public function handleRequest(Request $request) :self
 	{
 		$data = $request->all();
