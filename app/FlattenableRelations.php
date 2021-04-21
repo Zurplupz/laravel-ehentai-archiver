@@ -18,6 +18,9 @@ abstract class FlattenableRelations extends Model
 
 	protected function defineNestedRelations(array $rels)
 	{
+		// name: name of object that will contain the relations
+		// has: name of the relation/method that returns the relations
+
 		$rels = array_filter($rels, function ($v, $k) {
 			$array = !empty($v['name']) && !empty($v['has']); 
 
@@ -49,6 +52,7 @@ abstract class FlattenableRelations extends Model
 		}
 
 		foreach ($relation_groups as $children_name => $children) {
+			// this relation is unknown
 			if (empty($this->nested_relations[$children_name])) {
 				continue;
 			}
@@ -70,9 +74,11 @@ abstract class FlattenableRelations extends Model
 				$gc_list[$pk] = $child->{$grandchild}->name;
 			});
 
+			// attach the granchildren to the grandpa
 			$this->{$gc_name} = $gc_list;
 		}
 
+		// return grandpa
 		return $this;
 	}
 }
