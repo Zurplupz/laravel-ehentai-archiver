@@ -2,6 +2,8 @@
 
 namespace App;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use App\ReturnsFlatenned;
 
 /**
  * 
@@ -14,6 +16,15 @@ abstract class FlattenableRelations extends Model
 	function __construct(string $models_namespace='App')
 	{
 		parent::__construct();
+	}
+
+	public static function query()
+	{
+		$q = parent::query();
+
+		$class = new ReturnsFlatenned($q);
+		
+		return $class;
 	}
 
 	protected function defineNestedRelations(array $rels)

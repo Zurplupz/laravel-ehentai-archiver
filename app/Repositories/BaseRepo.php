@@ -69,7 +69,9 @@ abstract class BaseRepo
 
 	public function get()
 	{
-		$result = $this->model->get();
+		$args = func_get_args();
+
+		$result = $this->model->get(...$args);
 
 		$this->reset();
 
@@ -78,7 +80,9 @@ abstract class BaseRepo
 
 	public function first()
 	{
-		$result = $this->model->first();
+		$args = func_get_args();
+
+		$result = $this->model->first(...$args);
 
 		$this->reset();
 
@@ -87,7 +91,9 @@ abstract class BaseRepo
 
 	public function find($id)
 	{
-		$result = $this->model->find($id);
+		$args = func_get_args();
+
+		$result = $this->model->find(...$args);
 
 		$this->reset();
 
