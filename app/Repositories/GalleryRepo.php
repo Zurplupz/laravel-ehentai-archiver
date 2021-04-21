@@ -18,11 +18,15 @@ class GalleryRepo extends BaseRepo
 	protected $select;
 	protected $cols;
 	
-	function __construct()
+	function __construct($with_relationships=true)
 	{
 		$q = new gallery;
 
 		$this->defineModel($q);
+
+		if ($with_relationships) {
+			$this->model->with('gallery_group.group')->with('gallery_tagging.tag');
+		}
 	}
 
 	public function gid(string $gid) :self

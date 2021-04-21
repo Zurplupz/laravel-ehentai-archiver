@@ -89,7 +89,7 @@ abstract class BaseRepo
 		return $result;
 	}
 
-	public function find($id)
+	public function find()
 	{
 		$args = func_get_args();
 
