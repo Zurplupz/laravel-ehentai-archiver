@@ -18,40 +18,15 @@ class GalleryRepo extends BaseRepo
 	protected $select;
 	protected $cols;
 	
-	function __construct()
+	function __construct($with_relationships=true)
 	{
 		$q = new gallery;
 
-		$this->defineModel($q->query());	
-	}
+		$this->defineModel($q);
 
-	public function select(array $selected) :self
-	{
-		if (empty($this->cols)) {
-			$this->cols = \Schema::getColumnListing('galleries');
+		if ($with_relationships) {
+			$this->model->with('gallery_group.group')->with('gallery_tagging.tag');
 		}
-
-		if (empty($this->select)) {
-			$this->select = [];
-		}
-
-		$selected = array_filter($selected);
-
-		foreach ($selected as $k => $v) {
-			if (!in_array($v, $this->cols) || in_array($v, $this->select))
-			{
-				unset($selected[$k]);
-				continue;
-			}
-
-			$this->select[] = $v;
-		}
-
-		if ($selected) {
-			$this->model->addSelect($selected);
-		}
-
-		return $this;
 	}
 
 	public function gid(string $gid) :self
@@ -193,65 +168,6 @@ class GalleryRepo extends BaseRepo
 		}
 	}
 
-	protected function flattenRelationships($data)
-	{
-		if (!$data instanceof Model) 
-		{
-			if (!$data instanceof Collection) {
-				return $data;
-			}
-
-			$data->each(function ($model) {
-				$this->flattenRelationships($model);
-			});
-
-			return $data;
-		}
-
-		$quit = !empty($this->select) && (
-			!in_array('tags', $this->select) || 
-			!in_array('groups', $this->select)
-		);
-
-		if ($quit) {
-			return $data;
-		}
-
-		$tag_list = [];
-
-		$data->gallery_tagging->each(
-			function ($relationship) use (&$tag_list) {
-				if (empty($relationship->tag)) {
-					return;
-				}
-
-				$id = $relationship->tag->id;
-
-				$tag_list[$id] = $relationship->tag->name;
-			}
-		);
-
-		$data->tag_list = $tag_list;
-
-		$group_list = [];
-
-		$data->gallery_group->each(
-			function ($relationship) use (&$group_list) {
-				if (empty($relationship->group)) {
-					return;
-				}
-
-				$id = $relationship->group->id;
-
-				$group_list[$id] = $relationship->group->name;
-			}
-		);
-
-		$data->group_list = $group_list;
-
-		return $data;
-	}
-
 	public function handleRequest(Request $request) :self
 	{
 		$data = $request->all();
@@ -304,45 +220,5 @@ class GalleryRepo extends BaseRepo
 		}
 
 		return $this;
-	}
-
-	protected function reset()
-	{		
-		$q = new gallery;
-
-		$this->defineModel($q->query());
-	}
-
-	public function get(bool $flatten=true)
-	{
-		$result = $this->model->get();
-
-		$this->reset();
-
-		return $flatten 
-			? $this->flattenRelationships($result) 
-			: $result;
-	}
-
-	public function first(bool $flatten=true)
-	{
-		$result = $this->model->first();
-
-		$this->reset();
-
-		return $flatten 
-			? $this->flattenRelationships($result) 
-			: $result;
-	}
-
-	public function find($id, bool $flatten=true)
-	{
-		$result = $this->model->find($id);
-
-		$this->reset();
-
-		return $flatten 
-			? $this->flattenRelationships($result) 
-			: $result;
 	}
 }
