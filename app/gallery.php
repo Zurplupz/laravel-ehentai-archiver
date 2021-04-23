@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\Flattenable;
 
-class gallery extends FlattenableRelations
+class gallery extends Model
 {
 	protected $hidden = ['gallery_group','gallery_tagging','archiver_key'];
 	protected $fillable = ['title','favorited','rating'];
@@ -19,18 +19,6 @@ class gallery extends FlattenableRelations
 		$this->guarded = array_filter($table, function ($v) {
 			return !in_array($v, $this->fillable);
 		});
-
-		$this->defineNestedRelations([
-			'gallery_group' 	=>	[
-				'name' => 'groups',
-				'has' => 'group'
-			], 
-
-			'gallery_tagging' 	=>	[
-				'name' => 'tags',
-				'has' => 'tag'
-			]
-		]);
 	}
 
 	public function gallery_group()

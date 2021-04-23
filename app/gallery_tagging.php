@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class gallery_tagging extends Model
 {
     public $timestamps = false;
+	protected $hidden = ['id','gallery_id','tag_id'];
 
     public function gallery()
     {

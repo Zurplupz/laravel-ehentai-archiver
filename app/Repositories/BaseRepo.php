@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 
 /**
  * 
@@ -53,50 +54,16 @@ abstract class BaseRepo
 		return $this;
 	}
 
-	public function limit(int $v) :self
+	public function __call(string $method, array $args)
 	{
-		$this->model->limit($v);
+		$result = $this->model->{$method}(...$args);
+
+		if (!$result instanceof Builder) {
+			$this->reset();
+
+			return $result;
+		}
 
 		return $this;
-	}
-
-	public function offset(int $v) :self
-	{
-		$this->model->offset($v);
-
-		return $this;
-	}
-
-	public function get()
-	{
-		$args = func_get_args();
-
-		$result = $this->model->get(...$args);
-
-		$this->reset();
-
-		return $result;
-	}
-
-	public function first()
-	{
-		$args = func_get_args();
-
-		$result = $this->model->first(...$args);
-
-		$this->reset();
-
-		return $result;
-	}
-
-	public function find()
-	{
-		$args = func_get_args();
-
-		$result = $this->model->find(...$args);
-
-		$this->reset();
-
-		return $result;
 	}
 }
