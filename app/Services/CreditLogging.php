@@ -30,7 +30,7 @@ class CreditLogging
 	        $str = $crawler->filterXpath('//html/body/div[2]/div[2]/div[1]/div[2]')->text('');
 
 	        if (!empty($str)) {
-	            $amount = (int) preg_replace('/[^\d]+/', '', $x);
+	            $amount = (int) preg_replace('/[^\d]+/', '', $str);
 
 	            $e = 'Log update';
 
@@ -97,9 +97,9 @@ class CreditLogging
         return true;
 	}
 
-	public function galleryDownload(int $cost) :bool
+	public function galleryDownload(int $cost, string $event='') :bool
 	{
-		$this->logExpense($cost);
+		$this->logExpense($cost, $event);
 
 		return true;
 	}

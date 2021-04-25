@@ -112,7 +112,7 @@ class GalleryRepo extends BaseRepo
 			}
 
 			if (empty($gallery)) {
-				$gallery = $this->gid($data['gid'])->first(false);
+				$gallery = $this->gid($data['gid'])->first();
 
 				if (empty($gallery)) {
 					$gallery = new gallery;

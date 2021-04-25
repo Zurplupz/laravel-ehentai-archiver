@@ -26,6 +26,8 @@ class DownloadGallery implements ShouldQueue
     protected $token;
     protected $archiver_key;
     protected $path;
+    protected $credits;
+    protected $cost;
 
     // todo: dynamically estimate download time
     public $timeout = 0;
@@ -88,6 +90,8 @@ class DownloadGallery implements ShouldQueue
             return;
         }
 
+        $this->credits = new CreditLogging;
+
         // todo: check if expunged
         $can = $this->checkIfCanDownload($params);
 
@@ -95,7 +99,7 @@ class DownloadGallery implements ShouldQueue
             return;
         }
 
-        $url = $this->getDownloadUrl();
+        $url = $this->getDownloadUrl($params);
 
         if (!$url) {
             return;
@@ -138,15 +142,17 @@ class DownloadGallery implements ShouldQueue
         }
 
         if ($mode === 'resampled') {
-            $cost = $form->resampledArchiveCost();
+            $this->cost = $form->resampledArchiveCost();
         } else {
-            $cost = $form->originalArchiveCost();
+            $this->cost = $form->originalArchiveCost();
         }
 
-        $credits = new CreditLogging;
+        if (!$this->cost) {
+            return true;
+        }
 
         try {
-            $credits->validateTransacion($cost);
+            $this->credits->validateTransacion($this->cost);
         }
 
         catch (InsufficientCreditsException $e) {
@@ -198,6 +204,10 @@ class DownloadGallery implements ShouldQueue
 
             return false;
         }
+
+        $this->credits->galleryDownload(
+            $this->cost, 'Downloaded gallery: ' . $this->gid
+        );
 
         return true;
     }
