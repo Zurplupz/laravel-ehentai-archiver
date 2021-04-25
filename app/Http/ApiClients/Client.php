@@ -48,6 +48,10 @@ abstract class Client
 				$data['debug'] = $debug;
 			}
 
+			if (!empty($this->cookies)) {
+				$data['cookies'] = $this->cookies;
+			}
+
 			$res = $this->guzzle->request($method, $path, $data);
 
 			$this->status = $res->getStatusCode();

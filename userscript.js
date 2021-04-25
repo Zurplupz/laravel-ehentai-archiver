@@ -80,7 +80,7 @@ docReady(function () {
 		}
 
 		catch (e) {
-			alert(e)
+			alert('API Request error')
 			console.error(e)
 		}
 

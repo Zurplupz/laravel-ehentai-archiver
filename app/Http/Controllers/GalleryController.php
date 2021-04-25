@@ -117,6 +117,20 @@ class GalleryController extends Controller
             
         $r = $exhentai->getGalleriesMetadata($gid_token_pairs);
 
+        if (empty($r)) {
+
+            $status = $exhentai->status ?? 500;
+            $error = $exhentai->lastError() ?? 'Unknown request error';
+
+            if ($status === 302) {
+                $error = 'Error requesting to exhentai.org, check user credentials and cookies';
+
+                \Log::warning($error, compact('gid_token_pairs'));
+            }
+
+            abort($status, $error);
+        }
+
         foreach ($r['gmetadata'] as $metadata) {
             $gid = $metadata['gid'];
 
