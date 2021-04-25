@@ -24,7 +24,6 @@ class CreateGalleriesTable extends Migration
             $table->tinyInteger('archived')->default('0');
             $table->string('archive_path')->nullable(true);
             $table->string('archiver_key', 100)->nullable(true);
-            $table->smallInteger('credits')->default('0');
             $table->string('category', 50)->nullable(true);
             $table->string('thumb')->nullable(true);
             $table->string('uploader')->nullable(true);
