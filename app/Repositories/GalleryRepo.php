@@ -210,8 +210,6 @@ class GalleryRepo extends BaseRepo
 		}
 
 		if (!empty($request->_fields)) {
-			// todo: model should be an string
-			// todo: getTable method should return columns
 			$this->select($request->_fields);
 
 			if (!empty($request_fields['tags']) && empty($data['tags'])) 

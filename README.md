@@ -6,21 +6,22 @@ This is an exhentai gallery archiver based on Laravel and inspired by [this proj
 ## Features
 Top ones are most likely to come sooner.
 
-- [x] Request to archive from favorites page (Supported modes: Minimal, Compact)
+- [x] Request to archive from favorites page (Unsupported modes: Extended)
 - [x] Show feedback of succesful archiving to user in browser 
 - [x] Get official gallery metadata 
 - [x] Browse archived galleries through API
 - [x] Search by name and tags 
-- [x] Download and store gallery from official archives
+- [x] Download and store gallery from official archives using Credits
 - [x] Keep track of archived galleries and show a badge on the exhentai list
 - [ ] Request to archive from gallery page and search page 
-- [ ] Manually add gallery
-- [ ] Archive galleries on background (queue jobs)
-- [ ] Synchronize gallery with exhentai
+- [ ] Download using GP
 - [ ] Track EH-Credits and give warning when amount isn't enough to download gallery
+- [ ] Download torrent
+- [ ] Manually add gallery
 - [ ] Basic authorization
 - [ ] Gallery viewer and browser
-- [ ] Download torrent
+- [ ] Archive galleries on background (queue jobs)
+- [ ] Synchronize gallery with exhentai
 - [ ] Scheduled downloads
 - [ ] Mobile mode gallery viewer
 - [ ] Add public and private paths to galleries

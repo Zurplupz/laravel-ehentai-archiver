@@ -1,5 +1,19 @@
 <?php
 
+
+/*
+ ____                                                         __                __     
+/\  _`\                                                      /\ \__            /\ \    
+\ \ \/\ \     __    _____    _ __     __     ___      __     \ \ ,_\     __    \_\ \   
+ \ \ \ \ \  /'__`\ /\ '__`\ /\`'__\ /'__`\  /'___\  /'__`\    \ \ \/   /'__`\  /'_` \  
+  \ \ \_\ \/\  __/ \ \ \L\ \\ \ \/ /\  __/ /\ \__/ /\ \L\.\_   \ \ \_ /\  __/ /\ \L\ \ 
+   \ \____/\ \____\ \ \ ,__/ \ \_\ \ \____\\ \____\\ \__/.\_\   \ \__\\ \____\\ \___,_\
+    \/___/  \/____/  \ \ \/   \/_/  \/____/ \/____/ \/__/\/_/    \/__/ \/____/ \/__,_ /
+                      \ \_\                                                            
+                       \/_/                                                            
+*/
+
+
 namespace App;
 use Illuminate\Database\Eloquent\Builder;
 use App\FlattenableRelations as Flattenable;
@@ -105,6 +119,4 @@ class ReturnsFlatenned
 
     	return $result;
     }
-
-    // todo: add all methods from Illuminate\Database\Eloquent\Builder thar return Model
 }
