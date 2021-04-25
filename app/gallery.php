@@ -7,7 +7,7 @@ use App\Flattenable;
 
 class gallery extends Model
 {
-	protected $hidden = ['gallery_group','gallery_tagging','archiver_key'];
+	protected $hidden = ['gallery_group','gallery_tagging','archiver_key','archive_path'];
 	protected $fillable = ['title','favorited','rating'];
 
 	function __construct()
