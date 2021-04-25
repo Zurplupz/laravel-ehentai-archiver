@@ -45,7 +45,7 @@ Top ones are most likely to come sooner.
 	php artisan queue:work
 	```
 5. Install an userscript extension on your browser (I recommend ViolentMonkey)
-6. Replace every instance of `http://localhost/lr/ehentai-archiver/public/api/`, with the directory where you installed the project
+6. Open file `userscript.js`. Replace every instance of `http://localhost/lr/ehentai-archiver/public/api/`, with the directory where you installed the project
 7. Add the userscript.js to the extension
 
 ## Usage
