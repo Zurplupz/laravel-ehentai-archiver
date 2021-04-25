@@ -8,10 +8,10 @@ use App\Repositories\GalleryRepo;
 use App\Http\Requests\ArchiveRequest;
 use App\Http\Requests\GalleryRequest;
 use App\Jobs\DownloadGallery;
+use App\Http\Resources\GalleryResource;
 
 class GalleryController extends Controller
 {
-    protected $exhentai;
     protected $galleries;
 
     function __construct()
@@ -28,7 +28,7 @@ class GalleryController extends Controller
     {
         $response = $this->galleries->handleRequest($request)->get();
     
-        return response($response->toJson())->header('Content-Type', 'application/json');
+        return new GalleryResource($response);
     }
 
     public function archiveStatus(Request $request)
