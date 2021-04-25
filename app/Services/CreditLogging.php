@@ -99,8 +99,6 @@ class CreditLogging
 
 	public function galleryDownload(int $cost) :bool
 	{
-		$this->validateDownload($cost);
-
 		$this->logExpense($cost);
 
 		return true;
