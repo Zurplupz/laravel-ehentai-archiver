@@ -90,6 +90,7 @@ class DownloadGallery implements ShouldQueue
             return;
         }
 
+        // todo: add cost of gallery to database
         $this->credits = new CreditLogging;
 
         // todo: check if expunged
@@ -119,11 +120,17 @@ class DownloadGallery implements ShouldQueue
 
     protected function checkIfCanDownload(array $params, string $mode='resampled') :bool
     {
-        $form = new DownloadForm($params);
+        try {
+            $form = new DownloadForm($params);
+        }
 
-        if (!$form) {
-            $error = __METHOD__ . ": Error getting archiver form";
-            $this->retryOrDie($error);
+        catch (\Exception $e) {
+            if ($e->getCode() >= 400) {
+                \Log::error($e->getMessage(), compact('params', 'mode'));
+                return false;
+            }
+
+            $this->retryOrDie($e->getMessage(), compact('params', 'mode'));
             return false;
         }
 
@@ -170,12 +177,18 @@ class DownloadGallery implements ShouldQueue
 
     protected function getDownloadUrl(array $params, string $mode='resampled') :string
     {
-        $page = new DownloadPage($params, $mode);
+        try {
+            $page = new DownloadPage($params, $mode);
+        }
 
-        if (empty($page)) {
-            $error = __METHOD__ . ": Error getting archiver page";
-            $this->retryOrDie($error, compact('params','mode'));
-            return '';
+        catch (\Exception $e) {
+            if ($e->getCode() >= 400) {
+                \Log::error($e->getMessage(), compact('params', 'mode'));
+                return '';
+            }
+
+            $this->retryOrDie($e->getMessage(), compact('params','mode'));
+            return '';            
         }
 
         $url =  $page->getFileUrl();
@@ -218,7 +231,7 @@ class DownloadGallery implements ShouldQueue
             throw new \Exception($error, 1);
         }
 
-        $x = ' (' . $this->attempts() . ' attempts)';
+        $x = ' (Retrying, ' . $this->attempts() . ' out of 3 attempts)';
 
         \Log::error($error . $x, compact('script','match'));
         $this->release(180);

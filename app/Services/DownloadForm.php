@@ -16,7 +16,9 @@ class DownloadForm extends EhCrawler
 		$r = $this->exhentai->requestArchiveForm($params);
 
 		if (empty($r)) {
-			return false;
+			throw new \Exception(
+				$r->lastError() ?: __METHOD_ . ': unknown request error', $r->status ?? 1
+			);			
 		}
 
 		$this->crawl($r); 

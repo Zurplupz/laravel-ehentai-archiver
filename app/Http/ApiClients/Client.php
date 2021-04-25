@@ -8,22 +8,36 @@ namespace App\Http\ApiClients;
 abstract class Client
 {
 	protected $guzzle;
-	protected $cookies;
 	protected $base_uri;
 	protected $auth;
-	protected $status;
+	public $status;
 	protected $result_type;
 
 	protected function defineGuzzle(array $params) :void
 	{
 		$this->guzzle = new \GuzzleHttp\Client($params);
+		$this->result_type = 'json';
+	}
+
+	public function lastError()
+	{
+		return $this->last_error ?? false;
+	}
+
+	private function setLastError($error)
+	{
+		if (is_string($error)) {
+			$error = json_decode($error, true) ?? $error;
+		}
+
+		$this->last_error = $error;
 	}
 
 	protected function request(string $path, array $data=[], string $method='GET', $debug=false) 
 	{
 		try {
 			if (empty($this->guzzle)) {
-				throw new \Exception(__METHOD__." Cliente Guzzle no definido", 1);
+				throw new \Exception(__METHOD__." Guzzle Client not defined", 1);
 			}
 
 			if (!empty($this->auth)) {
@@ -32,10 +46,6 @@ abstract class Client
 
 			if (!empty($debug)) {
 				$data['debug'] = $debug;
-			}
-
-			if (!empty($this->cookies)) {
-				$data['cookies'] = $this->cookies;
 			}
 
 			$res = $this->guzzle->request($method, $path, $data);
@@ -52,27 +62,60 @@ abstract class Client
 				default: return true;
 			}
 
-		} catch (\GuzzleHttp\Exception\RequestException $e) {
-			$error['error'] = $e->getMessage();
-			$error['request'] = $e->getRequest();
+		} 
 
-			if ($e->hasResponse()) {
-				$this->status = $e->getResponse()->getStatusCode();
+		catch (\GuzzleHttp\Exception\ConnectException $e) {
+			$response = $e->getMessage();
+			//$request = $e->getRequest();
 
-				if ($this->status) {
-					$error['response'] = $e->getResponse(); 
-				}
+			$this->setLastError($response);
+
+			if (!is_string($response)) {
+				$response = str_replace('\n', ' ', json_encode($response));
 			}
 
-			\Log::error('Error occurred in get request.', ['error' => $error]);
+			\Log::error('Failed connection', compact('response'));
 
 			return false;
+		}
 
-		} catch (\Exception $e) {
-			\Log::error($e->getMessage());
-			$this->status = 500;
+		catch (\GuzzleHttp\Exception\RequestException $e) {
+			//$request = $e->getRequest();
+			$this->status = $e->getResponse()->getStatusCode();
+
+			if ($e->hasResponse()) {
+				$response = $e->getResponse()->getBody()->getContents();
+			} else {
+				$response = $e->getMessage();
+			}				
+
+			$this->setLastError($response);
+
+			if (!is_string($response)) {
+				$response = str_replace('\n', ' ', json_encode($response));
+			} else {
+				$response = json_decode($response, true) ?? $response;
+			}
+
+			$f = '%s request error, status: %s"';
+
+			\Log::error(sprintf($f, $method, $this->status), compact('response'));
+
 			return false;
+		}
 
+		catch (Throwable $e) {
+			$error = $e->getMessage();
+
+			$this->setLastError($error);
+
+			if (!is_string($error)) {
+				$error = str_replace('\n', '', json_encode($error));
+			}
+
+			\Log::error(__METHOD__ . ': Throwable caught', compact('error'));
+
+			return false;
 		}
 	}
 }

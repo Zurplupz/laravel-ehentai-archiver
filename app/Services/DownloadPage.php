@@ -16,9 +16,11 @@ class DownloadPage extends EhCrawler
 		$r = $this->exhentai->requestArchive($params, $mode);
 
 		if (empty($r)) {
-			return false;
+			throw new \Exception(
+				$r->lastError() ?: __METHOD_ . ': unknown request error', $r->status ?? 1
+			);			
 		}
-
+		
 		$this->crawl($r); 
 	}
 

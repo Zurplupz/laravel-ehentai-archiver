@@ -15,7 +15,7 @@ Top ones are most likely to come sooner.
 - [x] Keep track of archived galleries and show a badge on the exhentai list
 - [ ] Request to archive from gallery page and search page 
 - [ ] Download using GP
-- [ ] Track EH-Credits and give warning when amount isn't enough to download gallery
+- [ ] Track Credits and GP and give warning when amount isn't enough to download gallery
 - [ ] Download torrent
 - [ ] Manually add gallery
 - [ ] Basic authorization
