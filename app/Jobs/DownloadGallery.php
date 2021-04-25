@@ -7,10 +7,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Http\ApiClients\ExhentaiClient;
-use Symfony\Component\DomCrawler\Crawler;
+
+use App\gallery;
 use App\Http\ApiClients\LiteDownloader;
-use App\Repositories\GalleryRepo;
+use App\Services\CreditLogging;
+use App\Services\DownloadForm;
+use App\Services\DownloadPage;
+use App\Exceptions\InsufficientCreditsException;
 
 // todo: schedule downloads
 // todo: when scheduled download, get new archiver key from api
@@ -63,23 +66,32 @@ class DownloadGallery implements ShouldQueue
      */
     public function handle()
     {
-        $galleries = new GalleryRepo;
+        $params = [
+            'gid' => $this->gid, 
+            'token' => $this->token, 
+            'or' => $this->archiver_key
+        ];
 
-        $g = $galleries->gid($this->gid)->first(false);
+        $g = gallery::where('gid', $this->gid)->first();
 
         if (empty($g)) {
             $err = "Gallery {$this->gid} doesn't exist in database";
 
-            \Log::error($err, ['gid' => $this->gid ]);
-
-            throw new \Exception($err, 1);            
+            \Log::error($err, compact('params'));
+            return;         
         }
 
-        // todo: check if expunged
         if ($g->archived && !empty($g->archive_path)) {
             $err = "Gallery {$this->gid} is already archived";
 
-            \Log::error($err, ['gid' => $this->gid ]);
+            \Log::error($err, compact('params'));
+            return;
+        }
+
+        // todo: check if expunged
+        $can = $this->checkIfCanDownload($params);
+
+        if (!$can) {
             return;
         }
 
@@ -89,6 +101,90 @@ class DownloadGallery implements ShouldQueue
             return;
         }
 
+        $download = $this->download($url);
+
+        if (!$download) {
+            return;
+        }
+
+        $g->archived = true;
+        $g->archive_path = $this->path;
+
+        $g->save();
+    }
+
+    protected function checkIfCanDownload(array $params, string $mode='resampled') :bool
+    {
+        $form = new DownloadForm($params);
+
+        if (!$form) {
+            $error = __METHOD__ . ": Error getting archiver form";
+            $this->retryOrDie($error);
+            return false;
+        }
+
+        $disabled = $form->isResampledButtonDisabled();
+
+        if ($disabled) {
+            \Log::warning('Gallery does not have resample archive', compact('params'));
+
+            $mode = 'original';
+            $disabled = $form->isOriginalButtonDisabled();
+
+            if ($disabled) {
+                \Log::error('Gallery download buttons disabled', compact('params'));
+                return false;
+            }
+        }
+
+        if ($mode === 'resampled') {
+            $cost = $form->resampledArchiveCost();
+        } else {
+            $cost = $form->originalArchiveCost();
+        }
+
+        $credits = new CreditLogging;
+
+        try {
+            $credits->validateTransacion($cost);
+        }
+
+        catch (InsufficientCreditsException $e) {
+            \Log::error($e->getMessage(), compact('params'));
+            return false;
+        }
+
+        catch (\Trowable $e) {
+            $this->retryOrDie($e->getMessage(), compact('params'));
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function getDownloadUrl(array $params, string $mode='resampled') :string
+    {
+        $page = new DownloadPage($params, $mode);
+
+        if (empty($page)) {
+            $error = __METHOD__ . ": Error getting archiver page";
+            $this->retryOrDie($error, compact('params','mode'));
+            return '';
+        }
+
+        $url =  $page->getFileUrl();
+
+        if (empty($url)) {
+            $error = __METHOD__ . ": Error getting download url";
+            $this->retryOrDie($error, compact('params','mode'));
+            return '';
+        }
+
+        return $url;
+    }
+
+    public function download(string $url) :bool
+    {
         $client = new LiteDownloader;
 
         $downloaded = $client->download($url, $this->path);
@@ -100,52 +196,10 @@ class DownloadGallery implements ShouldQueue
                 'gid' => $this->gid, 'path' => $this->path, 'url' => $url
             ]);
 
-            return;
+            return false;
         }
 
-        $g->archived = true;
-        $g->archive_path = $this->path;
-
-        $g->save();
-    }
-
-    protected function getDownloadUrl()
-    {
-        $exhentai = new ExhentaiClient;
-
-        # request page
-        $page = $exhentai->requestArchive([
-            'gid' => $this->gid, 
-            'token' => $this->token, 
-            'or' => $this->archiver_key
-        ], 'resampled');
-
-        if (empty($page)) {
-            $error = __METHOD__ . ": Error getting archiver page";
-            $this->retryOrDie($error);
-            return;
-        }
-
-        // todo: check credit cost
-        $crawler = new Crawler($page);
-
-        $script = $crawler->filter('script[type]')->text() ?? '';
-        
-        if (empty($script)) {
-            $error = __METHOD__ . ": Error getting script from archiver page";
-            $this->retryOrDie($error, compact('script'));
-            return;
-        }
-
-        $find = preg_match('/"(?<url>https:\/\/[^"]+)"?/iu', $script, $match);
-
-        if (empty($match['url'])) {
-            $error = __METHOD__ . ": Error getting download url";
-            $this->retryOrDie($error, compact('script','match'));
-            return;
-        }
-
-        return $match['url'] . '?start=1';
+        return true;
     }
 
     protected function retryOrDie(string $error, array $context=[])
