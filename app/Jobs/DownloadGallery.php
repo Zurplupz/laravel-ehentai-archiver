@@ -28,6 +28,7 @@ class DownloadGallery implements ShouldQueue
     protected $path;
     protected $credits;
     protected $cost;
+    protected $gallery;
 
     // todo: dynamically estimate download time
     public $timeout = 0;
@@ -74,16 +75,16 @@ class DownloadGallery implements ShouldQueue
             'or' => $this->archiver_key
         ];
 
-        $g = gallery::where('gid', $this->gid)->first();
+        $this->gallery = gallery::where('gid', $this->gid)->first();
 
-        if (empty($g)) {
+        if (empty($this->gallery)) {
             $err = "Gallery {$this->gid} doesn't exist in database";
 
             \Log::error($err, compact('params'));
             return;         
         }
 
-        if ($g->archived && !empty($g->archive_path)) {
+        if ($this->gallery->archived && !empty($this->gallery->archive_path)) {
             $err = "Gallery {$this->gid} is already archived";
 
             \Log::error($err, compact('params'));
@@ -112,10 +113,10 @@ class DownloadGallery implements ShouldQueue
             return;
         }
 
-        $g->archived = true;
-        $g->archive_path = $this->path;
+        $this->gallery->archived = true;
+        $this->gallery->archive_path = $this->path;
 
-        $g->save();
+        $this->gallerysave();
     }
 
     protected function checkIfCanDownload(array $params, string $mode='resampled') :bool
@@ -153,6 +154,8 @@ class DownloadGallery implements ShouldQueue
         } else {
             $this->cost = $form->originalArchiveCost();
         }
+
+        $this->gallery->credits = $this->cost;
 
         if (!$this->cost) {
             return true;

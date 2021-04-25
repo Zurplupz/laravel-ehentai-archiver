@@ -18,6 +18,8 @@ class CreateGalleriesTable extends Migration
             $table->string('title');
             $table->integer('gid');
             $table->string('token', 50);
+            $table->smallInteger('credits')->nullable(true);
+            $table->smallInteger('gp')->nullable(true);
             $table->timestamp('favorited')->nullable(true);
             $table->tinyInteger('archived')->default('0');
             $table->string('archive_path')->nullable(true);
