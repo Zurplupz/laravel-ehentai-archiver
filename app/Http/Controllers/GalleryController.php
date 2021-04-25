@@ -123,6 +123,8 @@ class GalleryController extends Controller
             $error = $exhentai->lastError() ?? 'Unknown request error';
 
             if ($status === 302) {
+                $status = 500;
+
                 $error = 'Error requesting to exhentai.org, check user credentials and cookies';
 
                 \Log::warning($error, compact('gid_token_pairs'));

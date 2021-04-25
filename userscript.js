@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name     E-hentai favorite galleries archiver
 // @author	 Zurplupz - https://github.com/Zurplupz
-// @version  0.2.0
+// @version  0.2.2
 // @match      *://exhentai.org/*
 // @match      *://e-hentai.org/*
 // @resource style http://localhost/lr/ehentai-archiver/public/css/eh-archiver.css?v=GM_info.script.version
@@ -80,7 +80,7 @@ docReady(function () {
 		}
 
 		catch (e) {
-			alert('API Request error')
+			alert(e.message || 'API Request error')
 			console.error(e)
 		}
 
@@ -124,7 +124,7 @@ async function apiRequest(url, params={}, expect='json') {
 			throw new Error(e)
 		}
 
-		throw new Error(json.errors)
+		throw new Error(json.errors || json.message)
 	}
 
 	switch (expect) {
