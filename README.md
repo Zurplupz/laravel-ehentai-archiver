@@ -1,7 +1,9 @@
 <p align="center"><img src="https://i.kym-cdn.com/photos/images/newsfeed/001/516/619/f59.png"></p>
 
 ## About
-This is an exhentai gallery archiver based on Laravel and inspired by [this project](https://github.com/Sn0wCrack/ExHen-Archive). I'm working on this to put my Laravel knowledge to the test. Right now it can only download the gallery metadata and store in database. 
+This is an exhentai gallery archiver based on Laravel and inspired by [this project](https://github.com/Sn0wCrack/ExHen-Archive). I'm working on this to put my Laravel knowledge to the test.
+
+Right now it can download a gallery zip file, store the gallery metadata, path, and amount of credits.  
 
 ## Features
 Top ones are most likely to come sooner.
@@ -33,7 +35,7 @@ Top ones are most likely to come sooner.
 - Browser with userscript extension installed
 
 ## Setup
-1. `git clone repo@ssh exhentai-archiver && cd exhentai-archiver`
+1. `git clone git@github.com:Zurplupz/laravel-ehentai-archiver.git exhentai-archiver && cd exhentai-archiver`
 2. `composer install`
 3. Edit .env file with database login and name of database to use, defaults: root, no pass, exhentai
 4. ```bash
@@ -43,14 +45,15 @@ Top ones are most likely to come sooner.
 	php artisan queue:work
 	```
 5. Install an userscript extension on your browser (I recommend ViolentMonkey)
-6. Edit `var api_url = 'http://localhost/lr/ehentai-archiver/public/api/'`, replace `lr/ehentai-archiver/` with the directory where you installed the project
+6. Replace every instance of `http://localhost/lr/ehentai-archiver/public/api/`, with the directory where you installed the project
 7. Add the userscript.js to the extension
 
 ## Usage
 1. Go to exhentai favorites page
 2. Check the boxes of galleries you want to archive, select Archive and click Confirm. Careful not to select Delete
-3. (Expected behavior) The galleries will be downloaded and you will see a green badge appear on succesful jobs or a red badge on errors.
+3. The galleries will be downloaded and you will see a status label next to gallery name or on tags.
 
 ## ToDo
 1. Write more detailed description
 2. Make noob friendly setup
+3. Make further testing
