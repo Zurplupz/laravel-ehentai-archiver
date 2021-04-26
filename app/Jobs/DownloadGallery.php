@@ -116,7 +116,7 @@ class DownloadGallery implements ShouldQueue
         $this->gallery->archived = true;
         $this->gallery->archive_path = $this->path;
 
-        $this->gallerysave();
+        $this->gallery->save();
     }
 
     protected function checkIfCanDownload(array $params, string $mode='resampled') :bool
