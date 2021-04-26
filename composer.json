@@ -12,6 +12,7 @@
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.3",
+        "j7mbo/torrent-php": "dev-master",
         "laravel/framework": "^6.20",
         "laravel/tinker": "^2.5",
         "symfony/dom-crawler": "^5.2"
