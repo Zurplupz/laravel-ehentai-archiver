@@ -51,14 +51,21 @@ class DownloadGallery implements ShouldQueue
         }
 
         if (!empty($gallery_data['path'])) {
-            $this->path = $gallery_data['path'] . '/' . uniqid() . '.zip';
+
+            $path = $gallery_data['path'];
+
+            if (!preg_match('/\/$/', $path)) {
+                $path .= '/';
+            }
+
+            $this->path = $path . uniqid() . '.zip';
 
         } else {
             $storage_info = config('filesystems.disks');
 
             $path = $storage_info['local']['root'];
 
-            $this->path = $path . '/' . md5(uniqid()) . '.zip';
+            $this->path = $path . '/' . uniqid() . '.zip';
         }
     }
 
