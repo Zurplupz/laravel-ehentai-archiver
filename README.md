@@ -3,7 +3,7 @@
 ## About
 This is an exhentai gallery archiver based on Laravel and inspired by [this project](https://github.com/Sn0wCrack/ExHen-Archive). I'm working on this to put my Laravel knowledge to the test.
 
-Right now it can download a gallery zip file, store the gallery metadata, path, and amount of credits.  
+Right now it can download a gallery zip file, store the gallery metadata, path, and track amount of credits.  
 
 ## Features
 Top ones are most likely to come sooner.
