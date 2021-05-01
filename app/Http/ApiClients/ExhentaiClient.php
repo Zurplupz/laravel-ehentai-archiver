@@ -10,9 +10,9 @@ use GuzzleHttp\Cookie\CookieJar;
  */
 class ExhentaiClient extends Client
 {
-	protected $api_url = 'https://exhentai.org/api.php';
-	protected $archives_url = 'https://exhentai.org/archiver.php';
-	protected $exchange_url = 'https://e-hentai.org/exchange.php?t=gp';
+	const API_URL = 'https://exhentai.org/api.php';
+	const ARCHIVES_URL = 'https://exhentai.org/archiver.php';
+	const EXCHANGE_URL = 'https://e-hentai.org/exchange.php?t=gp';
 	
 	function __construct()
 	{
@@ -34,7 +34,7 @@ class ExhentaiClient extends Client
 			'namespace' => 1
 		];
 
-		return $this->request($this->api_url, compact('json'), 'POST');
+		return $this->request(self::API_URL, compact('json'), 'POST');
 	}
 
 	/* direct access to download link */
@@ -56,7 +56,7 @@ class ExhentaiClient extends Client
 			]
 		];
 
-		$response = $this->request($this->archives_url, $data, 'POST');
+		$response = $this->request(self::ARCHIVES_URL, $data, 'POST');
 		
 		$this->result_type = 'json';
 
@@ -67,7 +67,7 @@ class ExhentaiClient extends Client
 	{
 		$this->result_type = 'text';
 
-		$response = $this->request($this->archives_url, compact('query'), 'POST');
+		$response = $this->request(self::ARCHIVES_URL, compact('query'), 'POST');
 		
 		$this->result_type = 'json';
 
@@ -91,6 +91,6 @@ class ExhentaiClient extends Client
 		    'ipb_pass_hash' => env('EXHENTAI_PASS_HASH'),
 		], '.e-hentai.org');
 
-		return $this->request($this->exchange_url);
+		return $this->request(self::EXCHANGE_URL);
 	}
 }
