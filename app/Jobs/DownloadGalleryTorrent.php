@@ -31,6 +31,8 @@ class DownloadGalleryTorrent implements ShouldQueue
     // todo: dynamically estimate download time
     public $timeout = 0;
 
+    public $tries = 3;
+
     /**
      * Create a new job instance.
      *
