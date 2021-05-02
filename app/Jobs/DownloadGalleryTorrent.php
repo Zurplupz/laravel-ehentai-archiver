@@ -187,7 +187,7 @@ class DownloadGalleryTorrent implements ShouldQueue
 
         $x = ' (Retrying, ' . $this->attempts() . ' out of 3 attempts)';
 
-        \Log::error($error . $x, compact('script','match'));
+        \Log::error($error . $x, $context);
         $this->release(180);
     }
 }
