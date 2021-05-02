@@ -102,6 +102,8 @@ class DownloadGalleryTorrent implements ShouldQueue
         }
 
         try {
+            $this->deluge = new DelugeClient($this->password, $this->host, $this->port);
+
             $path = $this->saveTorrentFile($this->gid, $this->torrents);
 
             $context['path'] = $path;
@@ -156,11 +158,9 @@ class DownloadGalleryTorrent implements ShouldQueue
 
     protected function scheduleTorrentDownload(string $path)
     {
-        $deluge = new DelugeClient($this->password, $this->host, $this->port);
-
         $base64 = base64_encode(file_get_contents($path));
 
-        $r = $deluge->addFile($path, $base64);
+        $r = $this->deluge->addFile($path, $base64);
 
         if (empty($r) || !empty($r['error'])) {
             throw new \Exception($r['error'] ?? 'Deluge Request Error');            
@@ -171,7 +171,7 @@ class DownloadGalleryTorrent implements ShouldQueue
 
     protected function getTorrentStatus(string $id) :array
     {
-        $r = $this->checkTorrentStatus($id, ['status','state','files']);
+        $r = $this->deluge->getTorrentStatus($id, ['status','state','eta','files']);
 
         if (!empty($r['error']) || empty($r['result']['files'][0]['path'])) 
         {
