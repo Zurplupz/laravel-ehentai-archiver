@@ -13,6 +13,7 @@ class ExhentaiClient extends Client
 	const API_URL = 'https://exhentai.org/api.php';
 	const ARCHIVES_URL = 'https://exhentai.org/archiver.php';
 	const EXCHANGE_URL = 'https://e-hentai.org/exchange.php?t=gp';
+	const TORRENT_URL = 'https://exhentai.org/torrent/';
 	
 	function __construct()
 	{
@@ -92,5 +93,12 @@ class ExhentaiClient extends Client
 		], '.e-hentai.org');
 
 		return $this->request(self::EXCHANGE_URL);
+	}
+
+	public function downloadTorrentFile(int $gid, string $hash, $path)
+	{
+		$url = self::TORRENT_URL . "{$gid}/{$hash}.torrent";
+
+		return $this->request($url, ['sink' => $path]);
 	}
 }

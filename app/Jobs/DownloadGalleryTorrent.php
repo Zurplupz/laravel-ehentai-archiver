@@ -14,8 +14,8 @@ class DownloadGalleryTorrent implements ShouldQueue
 
     protected $gid;
     protected $token;
-    protected $archiver_key;
     protected $path;
+    protected $torrents;
 
     protected $gallery;
 
@@ -29,7 +29,7 @@ class DownloadGalleryTorrent implements ShouldQueue
      */
     public function __construct(array $gallery_data)
     {
-        $attr = ['gid','token','archiver_key','torrents'];
+        $attr = ['gid','token','torrents'];
 
         foreach ($gallery_data as $k => $v) {
             if (empty($v) && in_array($k, $attr)) {
