@@ -157,7 +157,7 @@ class GalleryController extends Controller
                     'gid' => $gid,
                     'token' => $metadata['token'],
                     'archiver_key' => $metadata['archiver_key'],
-                    'torrents' => $metadata['torrents']
+                    'torrents' => $metadata['torrents'] ?? []
                 ];
 
                 $this->scheduleDownload($gallery_data); 
