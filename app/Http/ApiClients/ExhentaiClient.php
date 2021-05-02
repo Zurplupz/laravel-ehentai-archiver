@@ -99,6 +99,8 @@ class ExhentaiClient extends Client
 	{
 		$url = self::TORRENT_URL . "{$gid}/{$hash}.torrent";
 
+		$this->result_type = NULL;
+
 		return $this->request($url, ['sink' => $path]);
 	}
 }
