@@ -33,6 +33,8 @@ class DownloadGallery implements ShouldQueue
     // todo: dynamically estimate download time
     public $timeout = 0;
 
+    public $tries = 3;
+
     /**
      * Create a new job instance.
      *
@@ -243,7 +245,7 @@ class DownloadGallery implements ShouldQueue
 
         $x = ' (Retrying, ' . $this->attempts() . ' out of 3 attempts)';
 
-        \Log::error($error . $x, compact('script','match'));
+        \Log::error($error . $x, $context);
         $this->release(180);
     }
 }

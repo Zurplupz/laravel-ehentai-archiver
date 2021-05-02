@@ -13,7 +13,7 @@ abstract class Client
 	public $status;
 	protected $result_type;
 
-	protected function defineGuzzle(array $params) :void
+	protected function defineGuzzle(array $params=[]) :void
 	{
 		$this->guzzle = new \GuzzleHttp\Client($params);
 		$this->result_type = 'json';

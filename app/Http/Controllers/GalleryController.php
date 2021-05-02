@@ -8,6 +8,7 @@ use App\Repositories\GalleryRepo;
 use App\Http\Requests\ArchiveRequest;
 use App\Http\Requests\GalleryRequest;
 use App\Jobs\DownloadGallery;
+use App\Jobs\DownloadGalleryTorrent;
 use App\Http\Resources\GalleryResource;
 
 class GalleryController extends Controller
@@ -147,17 +148,28 @@ class GalleryController extends Controller
 
             $this->galleries->add($metadata);
 
-            $response[$gid] = [
-                'status' => 'pending'
-            ];
+            $response[$gid] = ['status' => 'pending'];
 
             if ($debug) continue;
 
-            DownloadGallery::dispatch([
-                'gid' => $gid,
-                'token' => $metadata['token'],
-                'archiver_key' => $metadata['archiver_key']
-            ]); 
+            try {
+                $gallery_data = [
+                    'gid' => $gid,
+                    'token' => $metadata['token'],
+                    'archiver_key' => $metadata['archiver_key'],
+                    'torrents' => $metadata['torrents'] ?? []
+                ];
+
+                $this->scheduleDownload($gallery_data); 
+            }
+
+            catch (\Exception $e) {
+                \Log::error($e->getMessage(), compact('gallery_data'));
+
+                $response[$gid] = ['status' => 'error'];
+
+                continue;
+            }
         }
 
         return response()->json($response);
@@ -208,5 +220,37 @@ class GalleryController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    protected function scheduleDownload(array $gallery)
+    {
+        $download_method = env('DOWNLOAD_CHANNEL', 'ARCHIVE');
+
+        switch ($download_method) {
+            case 'TORRENT':{
+                if (empty($gallery['torrents'])) {
+                    throw new \Exception("This gallery has no torrents", 1);                    
+                }
+
+                $client_params = [
+                    'password'  => env('DELUGE_PASS', NULL),
+                    'host'      => env('DELUGE_HOST', NULL),
+                    'port'      => env('DELUGE_PORT', NULL)
+                ];
+
+                foreach ($client_params as $k => $v) {
+                    if (empty($v)) {
+                        throw new \Exception("Missing torrent client param: {$k}", 1);
+                    }
+                }
+
+                DownloadGalleryTorrent::dispatch($gallery, $client_params);
+                break;
+            }
+            
+            default:
+                DownloadGallery::dispatch($gallery);
+                break;
+        }
     }
 }
