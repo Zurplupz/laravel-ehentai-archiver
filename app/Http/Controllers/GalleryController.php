@@ -36,7 +36,7 @@ class GalleryController extends Controller
     {
         $gids = $request->gids ?? [];
 
-        $cols = ['id','gid','token','archived','archive_path'];
+        $cols = ['id','gid','token','archived'];
 
         $list = $this->galleries->gids($gids)->select($cols)->get();
 
@@ -45,13 +45,14 @@ class GalleryController extends Controller
         }
 
         $list = $list->toArray();
+
         $response = [];
 
         foreach ($list as $gallery) {
             $status = 'pending';
 
             // todo: add status missing files
-            if ($gallery['archived']===1 && !empty($gallery['archive_path'])) {
+            if ($gallery['archived']===1) {
                 $status = 'archived';
             }
 
