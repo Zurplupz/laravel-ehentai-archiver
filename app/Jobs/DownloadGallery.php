@@ -100,7 +100,6 @@ class DownloadGallery implements ShouldQueue
             return;
         }
 
-        // todo: add cost of gallery to database
         $this->credits = new CreditLogging;
 
         // todo: check if expunged

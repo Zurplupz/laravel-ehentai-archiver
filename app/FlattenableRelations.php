@@ -92,7 +92,6 @@ abstract class FlattenableRelations extends Model
 					return;
 				}
 
-				// todo: get primary key and columns dynamically
 				$pk = $child->{$grandchild}->id;
 
 				$gc_list[$pk] = $child->{$grandchild}->name;
