@@ -8,6 +8,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
+use App\gallery;
+
+use App\Http\ApiClients\ExhentaiClient;
+use App\Http\ApiClients\DelugeClient;
+
 class DownloadGalleryTorrent implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -16,6 +21,10 @@ class DownloadGalleryTorrent implements ShouldQueue
     protected $token;
     protected $path;
     protected $torrents;
+
+    protected $host;
+    protected $port;
+    protected $password;
 
     protected $gallery;
 
@@ -27,13 +36,23 @@ class DownloadGalleryTorrent implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(array $gallery_data)
+    public function __construct(array $gallery_data, array $torrent_params)
     {
         $attr = ['gid','token','torrents'];
 
         foreach ($gallery_data as $k => $v) {
             if (empty($v) && in_array($k, $attr)) {
                 throw new \Exception("Missing gallery property: {$k}", 1);                
+            }
+
+            $this->{$k} = $v;
+        }
+
+        $attr = ['host','port','password'];
+
+        foreach ($torrent_params as $k => $v) {
+            if (empty($v) && in_array($k, $attr)) {
+                throw new \Exception("Missing torrent client param: {$k}", 1);                
             }
 
             $this->{$k} = $v;
@@ -47,14 +66,12 @@ class DownloadGalleryTorrent implements ShouldQueue
                 $path .= '/';
             }
 
-            $this->path = $path . uniqid() . '.zip';
+            $this->path = $path;
 
         } else {
             $storage_info = config('filesystems.disks');
 
-            $path = $storage_info['local']['root'];
-
-            $this->path = $path . '/' . uniqid() . '.zip';
+            $this->path = $storage_info['local']['root'] . '/';
         }
     }
 
@@ -65,6 +82,112 @@ class DownloadGalleryTorrent implements ShouldQueue
      */
     public function handle()
     {
-        //
+        $context = [
+            'gid' => $this->gid, 
+            'torrents' => $this->torrents,
+            'torrent_client_password' => $this->password, 
+            'torrent_client_host' => $this->host, 
+            'torrent_client_port' => $this->port
+        ];
+
+        $this->gallery = gallery::where('gid', $this->gid)->first();
+
+        if (empty($this->gallery)) {
+            $err = "Gallery {$this->gid} doesn't exist in database";
+
+            \Log::error($err, $context);
+            return;         
+        }
+
+        try {
+            $path = $this->saveTorrentFile($this->gid, $this->torrents);
+
+            $context['path'] = $path;
+
+            $torrent_id = $this->scheduleTorrentDownload($path);
+
+            $context['torrent_id'] = $torrent_id;
+
+            $status = $this->getTorrentStatus($torrent_id);
+
+            $path = $status['result']['files'][0]['path'];
+            $eta = $status['result']['eta'];
+
+            $context['path'] = $path;
+            $context['eta'] = $eta;
+
+            // todo: add torrent model
+            $this->gallery->archive_path = $path;
+            
+            // todo: schedule task to check torrent download finished
+            $this->gallery->archived = true;
+            $this->gallery->save();
+        }
+
+        catch (\Exception $e) {
+            $this->retryOrDie($e->getMessage(), $context);
+            return;
+        }
+    }
+
+    protected function saveTorrentFile(int $gid, array $torrents) :string
+    {
+        $exhentai = new ExhentaiClient;
+
+        // todo: save file with the gallery name before replacing forbidden chars
+        foreach ($torrents as $t) {
+            if (empty($t['hash'])) {
+                continue;
+            }
+
+            $p = $this->path . $t['hash'] . '.torrent';
+
+            $success = $exhentai->downloadTorrentFile($gid, $t['hash'], $p);
+
+            if ($success) {
+                return $p;
+            }
+        }
+
+        throw new \Exception("No torrent could be downloaded");
+    }
+
+    protected function scheduleTorrentDownload(string $path)
+    {
+        $deluge = new DelugeClient($this->password, $this->host, $this->port);
+
+        $base64 = base64_encode(file_get_contents($path));
+
+        $r = $deluge->addFile($path, $base64);
+
+        if (empty($r) || !empty($r['error'])) {
+            throw new \Exception($r['error'] ?? 'Deluge Request Error');            
+        }
+
+        return $r['result'];
+    }
+
+    protected function getTorrentStatus(string $id) :array
+    {
+        $r = $this->checkTorrentStatus($id, ['status','state','files']);
+
+        if (!empty($r['error']) || empty($r['result']['files'][0]['path'])) 
+        {
+            throw new \Exception($r['error'] ?? 'Deluge Request Error', 1);
+        }
+
+        return $r;
+    }
+
+    protected function retryOrDie(string $error, array $context=[])
+    {
+        if ($this->attempts() > 3) {
+            throw new \Exception($error, 1);
+        }
+
+        $x = ' (Retrying, ' . $this->attempts() . ' out of 3 attempts)';
+
+        \Log::error($error . $x, compact('script','match'));
+        $this->release(180);
     }
 }
