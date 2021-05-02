@@ -18,7 +18,7 @@ Top ones are most likely to come sooner.
 - [ ] Request to archive from gallery page and search page 
 - [ ] Download using GP
 - [ ] Track Credits and GP and give warning when amount isn't enough to download gallery
-- [ ] Download torrent
+- [x] Download torrent
 - [ ] Manually add gallery
 - [ ] Basic authorization
 - [ ] Gallery viewer and browser
