@@ -16,7 +16,11 @@ class LiteDownloader
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_MAXREDIRS => 5,
 			CURLOPT_FAILONERROR => false, // HTTP code > 400 will throw curl error
+			CURLOPT_CONNECTTIMEOUT => 30,
 			CURLOPT_TIMEOUT => 0,
+			CURLOPT_HTTPHEADER => [
+				'Accept: application/zip, application/octet-stream, application/x-zip-compressed'
+			],
 			CURLOPT_WRITEFUNCTION => function ($resource, $data) {
 				return fwrite($resource, $data);
 			}
@@ -29,7 +33,7 @@ class LiteDownloader
 
 	// todo: set max file size
 	// todo: check file is zip
-	public function download(string $url, string $dest)
+	public function download(string $url, string $dest) :bool
 	{
 		$resource = is_resource($dest) ? $dest : fopen($dest, 'w');
 
