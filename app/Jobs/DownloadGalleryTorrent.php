@@ -19,6 +19,7 @@ class DownloadGalleryTorrent implements ShouldQueue
 
     protected $gid;
     protected $token;
+    protected $title;
     protected $path;
     protected $torrents;
 
@@ -40,7 +41,7 @@ class DownloadGalleryTorrent implements ShouldQueue
      */
     public function __construct(array $gallery_data, array $torrent_params)
     {
-        $attr = ['gid','token','torrents'];
+        $attr = ['gid','token','title','torrents'];
 
         foreach ($gallery_data as $k => $v) {
             if (empty($v) && in_array($k, $attr)) {
@@ -60,21 +61,48 @@ class DownloadGalleryTorrent implements ShouldQueue
             $this->{$k} = $v;
         }
 
-        if (!empty($gallery_data['path'])) {
+        $this->path = $this->setFilePath($gallery_data['path'] ?? '');
+    }
 
-            $path = $gallery_data['path'];
-
-            if (!preg_match('/\/$/', $path)) {
-                $path .= '/';
-            }
-
-            $this->path = $path;
-
-        } else {
+    protected function setFilePath(string $dir='')
+    {
+        if (!$dir) {
             $storage_info = config('filesystems.disks');
-
-            $this->path = $storage_info['local']['root'] . '/';
+            $dir = $storage_info['local']['root'];
         }
+
+        if (!preg_match('/\/$/', $dir)) {
+            $dir .= '/';
+        }
+
+        //\Log::error('title', ['title' => $this->title]);
+
+        $title = preg_replace('/[^\w\s\]\[\)\(]/u', '', $this->title);
+        $title = preg_replace('/\s{2,}/', ' ', $title);
+
+        //\Log::error('title', compact('title'));
+
+        $tlen = strlen($title);
+        $dlen = strlen($dir);
+        $total_len = $tlen + $dlen;
+
+        if ($total_len >= 230) {
+            $title = substr($title, 0, $total_len - 230);
+        }
+
+        $dir .= $title;
+
+        //\Log::error('directory', compact('dir'));
+
+        if (!is_dir($dir)) {
+            $created_dir = mkdir($dir, 0777, true);
+
+            if (!$created_dir) {
+                throw new \Exception("Couldn't create directory: {$dir}");
+            }
+        }
+        
+        return $dir . '/' . uniqid() . '.zip';
     }
 
     /**

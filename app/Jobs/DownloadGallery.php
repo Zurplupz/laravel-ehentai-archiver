@@ -24,7 +24,9 @@ class DownloadGallery implements ShouldQueue
 
     protected $gid;
     protected $token;
+    protected $title;
     protected $archiver_key;
+
     protected $path;
     protected $credits;
     protected $cost;
@@ -42,7 +44,7 @@ class DownloadGallery implements ShouldQueue
      */
     public function __construct(array $gallery_data)
     {
-        $attr = ['gid','token','archiver_key'];
+        $attr = ['gid','token','title','archiver_key'];
 
         foreach ($gallery_data as $k => $v) {
             if (empty($v) && in_array($k, $attr)) {
@@ -52,23 +54,50 @@ class DownloadGallery implements ShouldQueue
             $this->{$k} = $v;
         }
 
-        if (!empty($gallery_data['path'])) {
+        $this->path = $this->setFilePath($gallery_data['path'] ?? '');
+    }
 
-            $path = $gallery_data['path'];
-
-            if (!preg_match('/\/$/', $path)) {
-                $path .= '/';
-            }
-
-            $this->path = $path . uniqid() . '.zip';
-
-        } else {
+    protected function setFilePath(string $dir='')
+    {
+        // default: storage/app
+        if (!$dir) {
             $storage_info = config('filesystems.disks');
-
-            $path = $storage_info['local']['root'];
-
-            $this->path = $path . '/' . uniqid() . '.zip';
+            $dir = $storage_info['local']['root'];
         }
+
+        // add trailing slash: storage/app/
+        if (!preg_match('/\/$/', $dir)) {
+            $dir .= '/';
+        }
+
+        $title = preg_replace('/[^\w\s\]\[\)\(]/u', '', $this->title);
+        $title = preg_replace('/\s{2,}/', ' ', $title);
+
+        //\Log::error('directory', compact('title'));
+
+        $tlen = strlen($title);
+        $dlen = strlen($dir);
+        $total_len = $tlen + $dlen;
+
+        // if title of gallery too long
+        if ($total_len >= 230) {
+            $title = substr($title, 0, $total_len - 230);
+        }
+
+        $dir .= $title;
+
+        //\Log::error('directory', compact('dir'));
+
+        // create a dir with gallery name
+        if (!is_dir($dir)) {
+            $created_dir = mkdir($dir, 0777, true);
+
+            if (!$created_dir) {
+                throw new \Exception("Couldn't create directory: {$dir}");
+            }
+        }
+        
+        return $dir . '/' . uniqid() . '.zip';
     }
 
     /**
