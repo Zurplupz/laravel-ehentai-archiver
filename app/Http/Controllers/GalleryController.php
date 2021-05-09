@@ -10,6 +10,7 @@ use App\Http\Requests\GalleryRequest;
 use App\Jobs\DownloadGallery;
 use App\Jobs\DownloadGalleryTorrent;
 use App\Http\Resources\GalleryResource;
+use App\gallery;
 
 class GalleryController extends Controller
 {
@@ -205,9 +206,14 @@ class GalleryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, gallery $gallery)
     {
-        //
+        $data = $request->only($gallery->getFillable());
+        
+        $gallery->fill($data);
+        $gallery->save();
+    
+        return new GalleryResource($gallery);
     }
 
     /**
