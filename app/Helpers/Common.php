@@ -1,6 +1,6 @@
 <?php
 
-function gidTokenFromUrl(string $url) :array
+function gidAndTokenFromUrl(string $url) :array
 {
 	$x = preg_match('/.+e.hentai.org\/g\/(\d+)\/(\w+)\//', $url, $out);
 

@@ -34,21 +34,18 @@ class GalleryController extends Controller
 
     public function archiveStatus(Request $request)
     {
-        $gids = $request->gids ?? [];
-
-        $cols = ['id','gid','token','archived'];
-
-        $list = $this->galleries->gids($gids)->select($cols)->get();
+        $list = $this->galleries
+            ->gids($request->gids)
+            ->select(['id','gid','token','archived'])
+            ->get();
 
         if (empty($list)) {
             return;
         }
 
-        $list = $list->toArray();
-
         $response = [];
 
-        foreach ($list as $gallery) {
+        foreach ($list->toArray() as $gallery) {
             $status = 'pending';
 
             // todo: add status missing files
@@ -89,16 +86,16 @@ class GalleryController extends Controller
 
         foreach ($data['galleries'] as $id => $data) {
             // lookup metadata
-            $pair = gidTokenFromUrl($data['url']);
+            $gid_and_url = gidAndTokenFromUrl($data['url']);
 
-            if (!$pair) {
+            if (!$gid_and_url) {
                 $response[$id] = [
                     'status' => 'error'
                 ];
                 continue;
             }
 
-            $g = $this->galleries->gid($pair[0])->first();
+            $g = $this->galleries->gid($gid_and_url[0])->first();
 
             if ($g) {
                 $response[$id] = [
@@ -107,7 +104,7 @@ class GalleryController extends Controller
                 continue;
             }
 
-            $gid_token_pairs[] = $pair;
+            $gid_token_pairs[] = $gid_and_url;
 
         }
 
@@ -156,6 +153,7 @@ class GalleryController extends Controller
             try {
                 $gallery_data = [
                     'gid' => $gid,
+                    'title' => $metadata['title'],
                     'token' => $metadata['token'],
                     'archiver_key' => $metadata['archiver_key'],
                     'torrents' => $metadata['torrents'] ?? []
